@@ -42,7 +42,6 @@ session_ids = ['3ccb36d7-a99c-4fad-8c0a-de1eea457a1d',
 for range_id in session_ids:
     collect_range_session_data(range_id)
 
-
 clubs = collect_clubs_used_at_range()
 
 for club in clubs:
