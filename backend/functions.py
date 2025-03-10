@@ -1,20 +1,78 @@
+# Import selenium dependencies
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium import webdriver
+
+# Import python dependencies
 from datetime import datetime
+from typing import Callable
+import functools
 import requests
+import warnings
+import logging
 import json
+import time
 import os
 
 
+def configure_logging() -> logging.Logger:
+    '''
+    '''
+    # Ignore warnings
+    warnings.filterwarnings("ignore")
+
+    # Configure Logger
+    logger = logging.getLogger('BASIC')
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    log_handler = logging.StreamHandler()
+    log_handler.setFormatter(formatter)
+    logger.addHandler(log_handler)
+
+    return logger
+
+
+def log_execution(
+    func: Callable
+) -> Callable:
+    '''
+    '''
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # Collect logger from kwargs
+        logger = kwargs.get('logger')
+
+        # Log execution of function
+        if logger:
+            logger.info(f"Executing {func.__name__}...")
+
+        try:
+
+            # Execute function passed into decorator
+            result = func(*args, **kwargs)
+
+            # Log successful execution of function
+            if logger:
+                logger.info(f"Function {func.__name__} executed successfully \n")
+
+            return result
+
+        except BaseException as e:
+            logger.error(f"Failed to execute {func.__name__} - {e}")
+            raise
+
+    return wrapper
+
+
+@log_execution
 def configure_driver(
     driver_path: str = 'chromedriver.exe',
-    headless: bool = False
+    headless: bool = False,
+    logger: logging.Logger = None
 ) -> WebDriver:
     '''
     '''
@@ -33,14 +91,16 @@ def configure_driver(
     return driver
 
 
+@log_execution
 def login_to_trackman(
     driver: WebDriver,
     email: str,
-    password: str
+    password: str,
+    logger: logging.Logger = None
 ) -> WebDriver:
     '''
     '''
-    while True:
+    for retries in range(5):
         try:
             # Navigate the trackman report page
             driver.get("https://portal.trackmangolf.com/player/activities?type=reports")
@@ -57,18 +117,23 @@ def login_to_trackman(
             password_field.send_keys(password)
 
             # Trigger JavaScript directly to simulate the button click
+            time.sleep(1)
+            logger.info(f"Attempt {retries + 1}: Logging into Trackman")
             driver.execute_script("signinBtnClicked()")
 
-            break
+            return driver
 
-        except:
+        except BaseException:
+            time.sleep(1)
             driver.close()
 
-    return driver
+    logger.error('Failed to login to trackman')
+    raise
 
-
+@log_execution
 def collect_trackman_access_token(
-    driver: WebDriver
+    driver: WebDriver,
+    logger: logging.Logger
 ) -> str:
     '''
     '''
@@ -80,14 +145,19 @@ def collect_trackman_access_token(
     # Parse the JSON string
     try:
         json_data = json.loads(body_content)
+
+        driver.close()
+
         return json_data['accessToken']
 
-    except json.JSONDecodeError:
-        print("Error: The content is not valid JSON.")
+    except BaseException as e:
+        logger.error(f"Failed to collect trackman access token - {e}")
 
 
+@log_execution
 def collect_range_session_ids(
-    access_token: str
+    access_token: str,
+    logger: logging.Logger = None
 ) -> list:
     '''
     '''
@@ -272,22 +342,28 @@ def collect_range_session_ids(
         }
     }
 
-    # Make the POST request
-    response = requests.post(url, json=body, headers=headers)
+    for retry in range(5):
+        try:
+            # Make the POST request
+            logger.info(f'Attempt {retry + 1}: Fetching range session ids')
+            response = requests.post(url, json=body, headers=headers)
 
-    # Check for a successful response
-    if response.status_code == 200:
-        data = response.json()['data']['me']['activities']['items']
-        return [activitiy['reportLink'].split('ReportId=')[-1] for activitiy in data]
+            # Check for a successful response
+            if response.status_code == 200:
+                data = response.json()['data']['me']['activities']['items']
+                return [activitiy['reportLink'].split('ReportId=')[-1] for activitiy in data]
 
-        # print("Response data:", response.json()['data']['activities']['items'])
-    else:
-        print(f"Failed to fetch data. Status code: {response.status_code}")
-        print("Response:", response.text)
+        except BaseException:
+            time.sleep(3 + (2 ** retry))
+
+    logger.error('Failed to collect range session ids')
+    raise
 
 
+@log_execution
 def collect_range_session_data(
-    session_id: str
+    session_id: str,
+    logger: logging.Logger = None
 ) -> None:
     '''
     '''
@@ -295,7 +371,24 @@ def collect_range_session_data(
     url = "https://golf-player-activities.trackmangolf.com/api/reports/getreport"
 
     # Headers
-    headers = {}
+    headers = {
+        "authority": "golf-player-activities.trackmangolf.com",
+        "method": "POST",
+        "path": "/api/reports/getreport",
+        "scheme": "https",
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US,en;q=0.9,en-GB;q=0.8",
+        "origin": "https://web-dynamic-reports.trackmangolf.com",
+        "priority": "u=1, i",
+        "referer": "https://web-dynamic-reports.trackmangolf.com/",
+        "sec-ch-ua": '"Not A(Brand)";v="8", "Chromium";v="132", "Microsoft Edge";v="132"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site"
+    }
 
     # JSON payload (body)
     payload = {
@@ -303,24 +396,43 @@ def collect_range_session_data(
     }
 
     # Set the user-agent and other headers
-    headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0"
+    headers["User-Agent"] = \
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " + \
+        "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0"
 
-    # Send POST request
-    response = requests.post(url, json=payload, headers=headers)
+    # Implement retires into report collection
+    for retry in range(5):
+        try:
+            # Send POST request
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
 
-    # Check if request was successful
-    if response.status_code == 200:
+            # Check if request was successful
+            if response.status_code == 200:
 
-        file_path = f'data/full_session_summary/session-{response.json()['StrokeGroups'][0]['Date']}.json'
+                file_path = \
+                    'data/full_session_summary/session-' + \
+                    f'{response.json()['StrokeGroups'][0]['Date']}-' + \
+                    f'{session_id}.json'
 
-        print(file_path)
+                # Write the list to the JSON file
+                with open(file_path, 'w') as json_file:
+                    json.dump(response.json(), json_file, indent=5)
 
-        # Write the list to the JSON file
-        with open(file_path, 'w') as json_file:
-            json.dump(response.json(), json_file, indent=5)
+                logger.info(f'{response.json()['StrokeGroups'][0]['Date']}-'
+                            f'{session_id}.json range data collected')
+
+                return
+
+        except BaseException:
+            time.sleep(3 + (2 ** retry))
+
+    logger.error('Failed to collect range session data')
 
 
-def collect_clubs_used_at_range() -> list:
+@log_execution
+def collect_clubs_used_at_range(
+    logger: logging.Logger = None
+) -> list:
     '''
     '''
     # Specify the directory path
@@ -344,7 +456,11 @@ def collect_clubs_used_at_range() -> list:
     return clubs
 
 
-def summarise_range_club_data(club: str) -> None:
+@log_execution
+def summarise_range_club_data(
+    club: str,
+    logger: logging.Logger = None
+) -> None:
 
     # Specify the directory path
     directory = "data/full_session_summary/"
