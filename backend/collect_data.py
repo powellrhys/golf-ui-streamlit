@@ -9,6 +9,7 @@ from functions import (
     collect_range_session_data,
     collect_range_session_ids,
     summarise_range_club_data,
+    collect_yardage_book_data,
     configure_logging,
     login_to_trackman,
     configure_driver
@@ -45,6 +46,10 @@ for i, range_id in enumerate(session_ids):
 
 clubs = collect_clubs_used_at_range(logger=logger)
 
+
 for i, club in enumerate(clubs):
     logger.info(f'{i + 1}/{len(clubs)} Summarising club data for {club}')
     summarise_range_club_data(club)
+
+collect_yardage_book_data(clubs=clubs,
+                          logger=logger)

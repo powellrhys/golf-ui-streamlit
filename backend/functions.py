@@ -10,6 +10,7 @@ from selenium import webdriver
 # Import python dependencies
 from datetime import datetime
 from typing import Callable
+import statistics as stat
 import functools
 import requests
 import warnings
@@ -483,3 +484,37 @@ def summarise_range_club_data(
     # Write the list to the JSON file
     with open(f'data/club_summary/{club}.json', 'w') as json_file:
         json.dump(sorted_data, json_file, indent=5)
+
+
+@log_execution
+def collect_yardage_book_data(
+    clubs: str,
+    logger: logging.Logger = None
+) -> None:
+    '''
+    '''
+    for shots in [10, 20, 30, 40, 50, 100]:
+        yardage_book = []
+        for club in clubs:
+
+            # Read the JSON file
+            with open(f'data/club_summary/{club}.json', 'r') as json_file:
+                data = json.load(json_file)[0:shots]
+
+            club_data = {
+                'avg_carry': round(stat.mean([i['Measurement']['Carry'] for i in data]), 2),
+                'min_carry': round(min([i['Measurement']['Carry'] for i in data]), 2),
+                'max_carry': round(max([i['Measurement']['Carry'] for i in data]), 2),
+                'avg_distance': round(stat.mean([i['Measurement']['Total'] for i in data]), 2),
+                'min_distance': round(min([i['Measurement']['Total'] for i in data]), 2),
+                'max_distance': round(max([i['Measurement']['Total'] for i in data]), 2),
+                'avg_all_speed': round(stat.mean([i['Measurement']['BallSpeed'] for i in data]), 2),
+                'avg_max_height': round(stat.mean([i['Measurement']['MaxHeight'] for i in data]), 2),
+                'avg_launch_angle': round(stat.mean([i['Measurement']['LaunchAngle'] for i in data]), 2)
+            }
+
+            yardage_book.append({club: club_data})
+
+        # Write the list to the JSON file
+        with open(f'data/yardage_summary/latest_{shots}_shot_summary.json', 'w') as json_file:
+            json.dump(yardage_book, json_file, indent=5)
