@@ -349,14 +349,13 @@ def collect_range_session_data(
                     f"{response.json()['StrokeGroups'][0]['Date']}-" + \
                     f"{session_id}.json"
 
-
                 # Write the list to the JSON file
                 with open(file_path, 'w') as json_file:
                     json.dump(response.json(), json_file, indent=5)
 
                 # Log successful action
-                logger.info(f'{response.json()['StrokeGroups'][0]['Date']}-'
-                            f'{session_id}.json range data collected')
+                logger.info(f"{response.json()['StrokeGroups'][0]['Date']}-"
+                            f"{session_id}.json range data collected")
 
                 return
 
