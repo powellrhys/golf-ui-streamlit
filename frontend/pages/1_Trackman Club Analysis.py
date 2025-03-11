@@ -102,7 +102,8 @@ with col3:
 final_flight_df = pd.concat(all_data, ignore_index=True)
 final_end_df = pd.concat(end_data, ignore_index=True)
 
-with st.expander('Shot Trajectory'):
+with st.expander(label='Shot Trajectory',
+                 expanded=True):
 
     # Plot all trajectories using Plotly Express
     fig = px.line(data_frame=final_flight_df,
@@ -110,11 +111,14 @@ with st.expander('Shot Trajectory'):
                   y='y',
                   color='Shot',
                   )
+    fig.update_layout(yaxis_title="Height (m)")
+    fig.update_layout(xaxis_title="Distance (m)")
 
     # Display in Streamlit
     st.plotly_chart(fig)
 
-with st.expander('Shot Distribution'):
+with st.expander(label='Shot Distribution',
+                 expanded=True):
 
     import plotly.graph_objects as go
 
