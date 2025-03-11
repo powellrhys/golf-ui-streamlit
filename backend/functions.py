@@ -346,8 +346,9 @@ def collect_range_session_data(
                 # Define output file path
                 file_path = \
                     'data/full_session_summary/session-' + \
-                    f'{response.json()['StrokeGroups'][0]['Date']}-' + \
-                    f'{session_id}.json'
+                    f"{response.json()['StrokeGroups'][0]['Date']}-" + \
+                    f"{session_id}.json"
+
 
                 # Write the list to the JSON file
                 with open(file_path, 'w') as json_file:
