@@ -1,10 +1,32 @@
+# Import python packages
 import streamlit as st
 import pandas as pd
 import json
 import os
 
 class ProjectVariables:
+    """
+    A class to manage project-specific variables and Streamlit session state initialization.
 
+    This class initializes and maintains essential variables for the application, including:
+    - A list of available clubs derived from JSON files in a specified directory.
+    - Default values for various shot-related sliders.
+    - Initialization of Streamlit session state variables to ensure consistent application behavior.
+
+    Attributes:
+        clubs_directory (str): Directory path containing club summary JSON files.
+        clubs (list): List of club names derived from JSON filenames.
+        initial_shot_slider (int): Default value for shot-related sliders.
+
+    Session State Variables:
+        p1_club_selectbox (str): Selected club for player 1.
+        p1_total_shots_slider (int): Number of total shots for player 1.
+        p3_number_of_shots_selectbox (int): Number of shots for player 3.
+        p3_dist_metric_selectbox (str): Distance metric for player 3 (default: 'Carry').
+        p3_min_stats_checkbox (bool): Checkbox state for minimum stats display.
+        p3_max_stats_checkbox (bool): Checkbox state for maximum stats display.
+        p3_avg_stats_checkbox (bool): Checkbox state for average stats display.
+    """
     def __init__(self):
 
         # Define list of clubs
@@ -53,8 +75,31 @@ def collect_club_trajectory_data(
            list,
            list,
            list]:
-    '''
-    '''
+    """
+    Collects and processes trajectory data for a specified golf club.
+
+    This function reads shot data from a JSON file corresponding to the given club and
+    extracts relevant trajectory and performance metrics for a specified number of shots.
+
+    Args:
+        club (str): The name of the club for which trajectory data is collected.
+        total_shots (int): The number of shots to process from the dataset.
+
+    Returns:
+        tuple: A tuple containing:
+            - pd.DataFrame: A DataFrame with trajectory data for all shots.
+            - pd.DataFrame: A DataFrame containing final position data for each shot.
+            - list: A list of carry distances for each shot.
+            - list: A list of total distances for each shot.
+            - list: A list of ball speeds for each shot.
+
+    The function processes each shot by extracting:
+        - Carry, total distance, and ball speed from the measurement data.
+        - Adjusted (x, y, z) coordinates for the ball's trajectory.
+        - The final position of each shot.
+
+    The trajectory data is stored in Pandas DataFrames, and other metrics are returned as lists.
+    """
     # Read the JSON file
     with open(f'data/club_summary/{club}.json', 'r') as json_file:
         data = json.load(json_file)
@@ -126,8 +171,33 @@ def collect_yardage_summary_data(
     avg_stats: bool,
     dist_metric: str
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    '''
-    '''
+    """
+    Collects and processes yardage summary data for a specified number of shots.
+
+    This function reads yardage summary data from a JSON file and processes it into
+    two Pandas DataFrames: one summarizing selected statistics and another formatted
+    for visualization.
+
+    Args:
+        number_of_shots (int): The number of shots to retrieve data for.
+        min_stats (bool): Whether to include minimum yardage statistics.
+        max_stats (bool): Whether to include maximum yardage statistics.
+        avg_stats (bool): Whether to include average yardage statistics.
+        dist_metric (str): The distance metric to be used (e.g., "Carry", "Total").
+
+    Returns:
+        tuple:
+            - pd.DataFrame: A DataFrame containing yardage summary statistics based on selected filters.
+            - pd.DataFrame: A long-format DataFrame suitable for visualization, sorted by club and distance.
+
+    The function performs the following operations:
+        - Reads shot summary data from a JSON file.
+        - Creates a DataFrame with club names and corresponding statistics.
+        - Filters columns based on the selected statistics (min, max, avg).
+        - Renames columns for better readability.
+        - Converts the DataFrame into a long format for visualization.
+        - Sorts data by the specified distance metric.
+    """
     # Read the JSON file
     with open(f'data/yardage_summary/latest_{number_of_shots}_shot_summary.json', 'r') as json_file:
         data = json.load(json_file)

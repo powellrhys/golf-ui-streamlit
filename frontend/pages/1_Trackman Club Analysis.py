@@ -63,6 +63,7 @@ total_shots = st.sidebar.slider(
     )
 )
 
+# Collect page data
 final_flight_df, final_end_df, carry_data, total_distance, ball_speeds = \
     collect_club_trajectory_data(
         club=club,

@@ -48,7 +48,7 @@ number_of_shots = st.sidebar.selectbox(
     )
 )
 
-# define metric select box
+# Define metric select box
 dist_metric = st.sidebar.selectbox(
     label='Club Distribution Metric',
     options=['Carry', 'Distance'],
@@ -117,5 +117,6 @@ with st.expander(label='Yardage Table',
 with st.expander(label='Club Distribution',
                  expanded=True):
 
+    # Plot distribution stats
     plot_club_distribution_stats(df=df_long,
                                  dist_metric=dist_metric)

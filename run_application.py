@@ -9,8 +9,9 @@ streamlit_process = subprocess.Popen(["streamlit", "run", "frontend/Home.py"])
 
 # Wait for a little while (e.g., give Kafka consumer time to start)
 try:
+    # Keeps the script running
     while True:
-        time.sleep(1)  # Keeps the script running
+        time.sleep(1)
 except KeyboardInterrupt:
     print("Stopping processes...")
 

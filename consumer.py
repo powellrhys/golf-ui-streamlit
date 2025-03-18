@@ -1,4 +1,8 @@
-from confluent_kafka import Consumer, KafkaException
+# Import python packages
+from confluent_kafka import (
+    Consumer,
+    KafkaException
+)
 import logging
 
 # Create a logger specifically for Kafka logs
@@ -20,10 +24,12 @@ conf = {
     'auto.offset.reset': 'earliest',
 }
 
+# Configure consumer and subscribe to streaming topic
 consumer = Consumer(conf)
 topic = "streamlit_logs"
 consumer.subscribe([topic])
 
+# Poll kafka stream for entries
 try:
     while True:
         msg = consumer.poll(1.0)
