@@ -17,7 +17,7 @@ kafka_logger.propagate = False
 conf = {
     'bootstrap.servers': 'localhost:9092',
     'group.id': 'log-consumer-group',
-    'auto.offset.reset': 'earliest'
+    'auto.offset.reset': 'earliest',
 }
 
 consumer = Consumer(conf)

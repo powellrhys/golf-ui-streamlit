@@ -1,9 +1,11 @@
 # Import python packages
 from confluent_kafka import Producer
+from docker.errors import NotFound
 from typing import Callable
 import streamlit as st
 import datetime
 import logging
+import docker
 
 
 class KafkaLoggingHandler(logging.Handler):
@@ -77,3 +79,28 @@ def log_input_change(
         logger.info(msg_func())
 
     return callback
+
+
+def is_container_running(
+    container_name: str,
+    logger: logging.Logger
+) -> bool:
+    '''
+    '''
+    client = docker.from_env()
+
+    try:
+        # Get container by name
+        container = client.containers.get(container_name)
+
+        # Check if the container is running
+        if container.status == 'running':
+            return True
+        else:
+            return False
+    except NotFound:
+        logger.warning(f"Container '{container_name}' not found.")
+        return False
+    except Exception as e:
+        logger.warning(f"An error occurred: {e}")
+        return False
