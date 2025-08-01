@@ -38,4 +38,6 @@ logger.info("Login successful\n")
 # round_report_links = app.collect_round_urls()
 # logger.info("All round urls collected\n")
 
-app.collect_scorecard_data(round_links=['https://www.hole19golf.com/performance/rounds/mXw0hA'])
+x = app.collect_scorecard_data(round_links=['https://www.hole19golf.com/performance/rounds/mXw0hA'])
+
+print(x)

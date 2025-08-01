@@ -143,69 +143,94 @@ class RoundData(SeleniumDriver):
             round_links.append(href)
 
         return round_links
-        
-    def collect_scorecard_data(self, round_links: list) -> None:
-        """
-        Loads a live scorecard URL and extracts structured golf data.
-        """
+
+    def parse_fairways(self, cell_elements):
+        directions = []
+        for cell in cell_elements:
+            try:
+                hit = cell.find_element(By.CSS_SELECTOR, 'div.fairway-hit.scorecard-icon')
+                classes = hit.get_attribute('class').split()
+                if 'left' in classes:
+                    directions.append('left')
+                elif 'target' in classes:
+                    directions.append('target')
+                elif 'right' in classes:
+                    directions.append('right')
+                else:
+                    directions.append('N/A')
+            except BaseException:
+                directions.append('N/A')
+        return directions
+
+    def parse_gir(self, cell_elements):
+        gir_results = []
+        for cell in cell_elements:
+            classes = cell.get_attribute('class').split()
+            gir_results.append('gir' in classes and 'true' in classes)
+        return gir_results
+
+    def collect_scorecard_data(self, round_links: list) -> dict:
         url = round_links[0]
+        scorecard_data = {}
 
         try:
             self.driver.get(url)
-
             import time
-            time.sleep(3)  # wait for page to load fully; consider WebDriverWait for more reliable waits
+            time.sleep(3)
 
             scorecard_section = self.driver.find_element(By.CSS_SELECTOR, 'section.round-scorecard')
             round_lines = scorecard_section.find_elements(By.CSS_SELECTOR, 'div.round-line')
 
             for line in round_lines:
-                label = line.find_element(By.CSS_SELECTOR, 'div.line-left > p, div.line-left > p.body-bold').text
+                raw_label = line.find_element(By.CSS_SELECTOR, 'div.line-left > p, div.line-left > p.body-bold')\
+                    .text.strip()
+                label = raw_label.capitalize()
+
+                cell_elements = line.find_elements(By.CSS_SELECTOR, 'div.values > div.cell')
 
                 if 'fairways' in label.lower():
-                    fairway_elements = line.find_elements(By.CSS_SELECTOR, 'div.fairway-hit.scorecard-icon')
-                    directions = []
-
-                    for el in fairway_elements:
-                        classes = el.get_attribute('class').split()
-                        if 'left' in classes:
-                            directions.append('left')
-                        elif 'target' in classes:
-                            directions.append('target')
-                        elif 'right' in classes:
-                            directions.append('right')
-                        else:
-                            directions.append('unknown')
-
-                    print(f"{label}:")
-                    print("Directions:", directions)
-                    print("-" * 40)
+                    scorecard_data[label] = self.parse_fairways(cell_elements)
                     continue
 
-                # Extract values, ignoring cells that are empty or contain just &nbsp;
+                if 'gir' in label.lower():
+                    scorecard_data[label] = self.parse_gir(cell_elements)
+                    continue
+
+                # Default row (Par, Score, Putts, etc.)
                 values_elements = line.find_elements(By.CSS_SELECTOR, 'div.values > *')
                 values = []
                 for el in values_elements:
                     text = el.text.strip()
-                    # Also check if the element's HTML contains only &nbsp; or is empty
                     html = el.get_attribute('innerHTML').strip()
-                    if text and text != '\xa0' and html != '&nbsp;':
-                        values.append(text)
+                    if not text and html == '&nbsp;':
+                        values.append("N/A")
+                    else:
+                        values.append(text or "N/A")
 
-                # Extract points similarly
-                points_elements = line.find_elements(By.CSS_SELECTOR, 'div.points > *')
-                points = []
-                for p in points_elements:
-                    text = p.text.strip()
-                    html = p.get_attribute('innerHTML').strip()
-                    if text and text != '\xa0' and html != '&nbsp;':
-                        points.append(text)
+                scorecard_data[label] = values
 
-                print(f"{label}:")
-                print("Values:", values)
-                if points:
-                    print("Points:", points)
-                print("-" * 40)
+            return self.transform_scorecard_data(scorecard_data=scorecard_data)
 
         finally:
             self.driver.quit()
+
+    def transform_scorecard_data(self, scorecard_data):
+        holes = []
+
+        # Assuming all lists have exactly 18 elements
+        num_holes = 18
+
+        for i in range(num_holes):
+            hole_data = {"hole": i + 1}  # Hole number from 1 to 18
+
+            # Add each key/value from scorecard_data for the current hole index
+            for key, values in scorecard_data.items():
+                # Defensive: If value list shorter than 18, use 'N/A' or suitable default
+                if i < len(values):
+                    hole_data[key] = values[i]
+                else:
+                    hole_data[key] = "N/A"
+
+            holes.append(hole_data)
+
+        return holes
