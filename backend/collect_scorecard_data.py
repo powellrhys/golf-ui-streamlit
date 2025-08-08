@@ -1,8 +1,6 @@
 # Import project dependencies
-from backend.functions.logging import (
-    configure_logging
-)
-from backend.functions.scorecard import (
+from backend.functions import (
+    configure_logging,
     RoundAggregator,
     RoundData
 )

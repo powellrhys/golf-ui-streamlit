@@ -18,7 +18,7 @@ from selenium.webdriver.common.by import By
 from backend.functions.selenium_driver import SeleniumDriver
 from backend.functions.blob_client import BlobClient
 from shared import Variables
-# from functions.variables import Variables
+
 
 class RoundData(SeleniumDriver, BlobClient):
     """

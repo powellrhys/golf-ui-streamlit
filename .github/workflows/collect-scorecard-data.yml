@@ -27,20 +27,18 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install Chrome
+      # Configure and install Chrome
+      - name: Set up Chrome
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
 
-      # Make the included chromedriver executable
-      - name: Make chromedriver executable
-        run: chmod +x ./chromedriver
-
-      # Optionally add current directory to PATH
-      - name: Add chromedriver to PATH
-        run: echo "${{ github.workspace }}" >> $GITHUB_PATH
+      # Configure ChromeDriver
+      - name: Set up ChromeDriver
+        run: |
+          sudo apt-get install -y chromium-chromedriver
+          chromedriver --version
 
       # Install project dependencies
       - name: Install dependencies
