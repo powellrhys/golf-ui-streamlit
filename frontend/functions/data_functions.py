@@ -4,6 +4,26 @@ import pandas as pd
 import json
 import os
 
+
+class Variables:
+    """
+    """
+    def __init__(self):
+        # Define list of clubs
+        self.clubs_directory = "data/club_summary/"
+        self.clubs = [f.replace('.json', '')
+                      for f in os.listdir(self.clubs_directory)
+                      if os.path.isfile(os.path.join(self.clubs_directory, f))]
+
+def extract_stat_flags(metrics):
+    """
+    """
+    min_stats = "Min Stats" in metrics
+    max_stats = "Max Stats" in metrics
+    avg_stats = "Avg Stats" in metrics
+
+    return min_stats, max_stats, avg_stats
+
 class ProjectVariables:
     """
     A class to manage project-specific variables and Streamlit session state initialization.
