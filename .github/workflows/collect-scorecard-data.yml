@@ -6,9 +6,11 @@ on:
   push:
     paths:
       - 'backend/**'
+      - ".github/workflows/collect-scorecard-data.yml"
   pull_request:
     paths:
       - 'backend/**'
+      - ".github/workflows/collect-scorecard-data.yml"
 
 jobs:
   Update-Data:
