@@ -2,7 +2,7 @@
 selenium==4.25.0
 
 # Frontend
-streamlit==1.46.0
+# streamlit==1.46.0
 Authlib==1.5.1
 pandas==2.2.3
 

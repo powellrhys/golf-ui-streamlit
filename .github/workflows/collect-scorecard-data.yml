@@ -13,7 +13,7 @@ on:
       - ".github/workflows/collect-scorecard-data.yml"
 
 jobs:
-  Update-Data:
+  CollectScorecardData:
     runs-on: ubuntu-latest
 
     steps:
