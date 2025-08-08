@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Check out codebase
+      # Check out codebasehow 
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -27,23 +27,20 @@ jobs:
         with:
           python-version: 3.9
 
-      # Install Chrome
-      - name: Install Google Chrome
+      - name: Install Chrome
         run: |
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y wget
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
-      # Install ChromeDriver
-      - name: Install ChromeDriver
-        run: |
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)
-          wget -N https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip -P /tmp
-          unzip -o /tmp/chromedriver_linux64.zip -d /tmp
-          sudo mv -f /tmp/chromedriver /usr/local/bin/chromedriver
-          sudo chmod +x /usr/local/bin/chromedriver
+      # Make the included chromedriver executable
+      - name: Make chromedriver executable
+        run: chmod +x ./chromedriver
+
+      # Optionally add current directory to PATH
+      - name: Add chromedriver to PATH
+        run: echo "${{ github.workspace }}" >> $GITHUB_PATH
 
       # Install project dependencies
       - name: Install dependencies
