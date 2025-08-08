@@ -11,7 +11,7 @@ azure-storage-blob==12.24.0
 python-dotenv==1.0.1
 
 # Custom Packages
-git+https://github.com/powellrhys/python-streamlit-components.git@v0.1.5
+# git+https://github.com/powellrhys/python-streamlit-components.git@v0.1.5
 
 # streamlit==1.43.1
 # python-dotenv==1.0.1
