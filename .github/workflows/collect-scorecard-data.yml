@@ -46,7 +46,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Run data collection script
+      # Run data collection script - Scorecard
       - name: Run Data Collection Script
         env:
           blob_account_connection_string: ${{ secrets.blob_account_connection_string }}
