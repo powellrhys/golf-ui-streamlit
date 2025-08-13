@@ -10,6 +10,7 @@ class Variables():
     def __init__(self):
         """
         """
+        self.chromedriver_path = os.getenv("chromedriver_path", default="chromedriver.exe")
         self.blob_account_connection_string = os.getenv("blob_account_connection_string")
         self.golf_course_name = os.getenv("golf_course_name")
         self.round_site_base_url = os.getenv("round_site_base_url")

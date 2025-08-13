@@ -4,12 +4,17 @@ from backend.functions import (
     RoundAggregator,
     RoundData
 )
+from shared import Variables
 
 # Configure logger
 logger = configure_logging()
 
+vars = Variables()
+
 # Define RoundData object
-app = RoundData(logger=logger, headless=True)
+app = RoundData(logger=logger,
+                headless=True,
+                driver_path=vars.chromedriver_path)
 
 logger.info("Logging into golf scorecard application...")
 app.login_to_round_site()
