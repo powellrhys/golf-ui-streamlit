@@ -192,7 +192,7 @@ class RoundData(SeleniumDriver, BlobClient):
                 course = self.get_course_name()
 
                 self.logger.info(f"Evaluating scorecard {index} of {len(round_links)}: "
-                                 f"{course.capitalize().replace("_", " ")} | {date}")
+                                 f"{course.capitalize().replace('_', ' ')} | {date}")
 
                 scorecard_section = self.driver.find_element(By.CSS_SELECTOR, 'section.round-scorecard')
                 round_lines = scorecard_section.find_elements(By.CSS_SELECTOR, 'div.round-line')

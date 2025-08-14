@@ -14,7 +14,7 @@ vars = Variables()
 
 # Define TrackMan object
 app = TrackMan(logger=logger,
-               headless=False,
+               headless=True,
                driver_path=vars.chromedriver_path)
 
 # Login to trackman site
