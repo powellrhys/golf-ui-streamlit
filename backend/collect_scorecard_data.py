@@ -9,6 +9,7 @@ from shared import Variables
 # Configure logger
 logger = configure_logging()
 
+# Define script variables
 vars = Variables()
 
 # Define RoundData object

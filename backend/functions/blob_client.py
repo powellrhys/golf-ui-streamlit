@@ -8,7 +8,7 @@ from typing import (
 import json
 
 # Import project dependencies
-from backend.interfaces.blob_client_base import AbstractBlobClient
+from backend.interfaces import AbstractBlobClient
 from shared import Variables
 
 class BlobClient(AbstractBlobClient, Variables):

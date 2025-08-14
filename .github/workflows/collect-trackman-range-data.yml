@@ -1,4 +1,4 @@
-name: Collect Scorecard Data
+name: Collect Trackman Range Data
 on:
   workflow_dispatch:
   schedule:
@@ -13,7 +13,7 @@ on:
       - ".github/workflows/collect-scorecard-data.yml"
 
 jobs:
-  collect_scorecard_data:
+  collect_trackaman_range_data:
     runs-on: ubuntu-latest
 
     steps:
@@ -52,8 +52,7 @@ jobs:
           chromedriver_path: "/usr/bin/chromedriver"
           blob_account_connection_string: ${{ secrets.blob_account_connection_string }}
           golf_course_name: ${{ secrets.golf_course_name }}
-          round_site_base_url: ${{ vars.round_site_base_url }}
-          round_site_username: ${{ secrets.round_site_username }}
-          round_site_password: ${{ secrets.round_site_password }}
+          trackman_username: ${{ secrets.trackman_username }}
+          trackman_password: ${{ secrets.trackman_password }}
         run: |
-          python -m backend.collect_scorecard_data  
+          python -m backend.collect_trackman_data
