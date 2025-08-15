@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Check out codebasehow 
+      # Check out codebase
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -56,4 +56,4 @@ jobs:
           round_site_username: ${{ secrets.round_site_username }}
           round_site_password: ${{ secrets.round_site_password }}
         run: |
-          python -m backend.collect_scorecard_data  
+          python -m backend.collect_scorecard_data

@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium import webdriver
 
 # Import project dependencies
-from backend.interfaces import AbstractSeleniumDriver
+from ..interfaces.selenium_driver_base import AbstractSeleniumDriver
 
 class SeleniumDriver(AbstractSeleniumDriver):
     """

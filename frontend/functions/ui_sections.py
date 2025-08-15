@@ -1,16 +1,13 @@
-# Import python dependencies
-import streamlit as st
-
-# Import project dependencies
-from functions.data_functions import (
+# Import dependencies
+from shared import Variables, BlobClient
+from .ui_components import display_club_metrics
+from .data_functions import (
     collect_yardage_summary_data,
     collect_club_trajectory_data,
-    extract_stat_flags,
-    Variables
+    extract_stat_flags
 )
-from functions.ui_components import (
-    display_club_metrics
-)
+import streamlit as st
+
 from functions.plots import (
     plot_final_trajectory_contour,
     plot_shot_trajectories
@@ -27,20 +24,16 @@ def render_trackman_club_analysis(variables: Variables) -> None:
 
     columns = st.columns([2, 1, 2])
 
-    with columns[0]:
-        # Define sidebar club select box
-        club = st.selectbox(
-            label="Club",
-            options=variables.clubs)
+    blob_files = BlobClient().list_blob_filenames(container_name="golf", directory_path="trackman_club_summary")
+    clubs = [f.replace('.json', '').split("/")[-1] for f in blob_files]
 
+    # Render select box within first column
+    with columns[0]:
+        club = st.selectbox(label="Club", options=clubs)
+
+    # Render total shots slider in final column
     with columns[-1]:
-        # Define total shots slider
-        total_shots = st.slider(
-            label="Most recent shots:",
-            min_value=0,
-            max_value=30,
-            value=10,
-        )
+        total_shots = st.slider(label="Most recent shots:", min_value=0, max_value=30, value=10)
 
     # Collect page data
     final_flight_df, final_end_df, carry_data, total_distance, ball_speeds = \
@@ -56,15 +49,13 @@ def render_trackman_club_analysis(variables: Variables) -> None:
                          ball_speeds=ball_speeds)
 
     # Define shot trajectory expander
-    with st.expander(label='Shot Trajectory',
-                     expanded=True):
+    with st.expander(label='Shot Trajectory', expanded=True):
 
         # Plot all trajectories using Plotly Express
         plot_shot_trajectories(df=final_flight_df)
 
     # Define shot distribution expander
-    with st.expander(label='Shot Distribution',
-                     expanded=True):
+    with st.expander(label='Shot Distribution', expanded=True):
 
         # Generate plotly go contour plot
         plot_final_trajectory_contour(df=final_end_df)

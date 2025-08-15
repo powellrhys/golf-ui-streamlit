@@ -1,19 +1,7 @@
-# Import python packages
-import streamlit as st
+# Import dependencies
+from shared import BlobClient
 import pandas as pd
-import json
-import os
 
-
-class Variables:
-    """
-    """
-    def __init__(self):
-        # Define list of clubs
-        self.clubs_directory = "data/club_summary/"
-        self.clubs = [f.replace('.json', '')
-                      for f in os.listdir(self.clubs_directory)
-                      if os.path.isfile(os.path.join(self.clubs_directory, f))]
 
 def extract_stat_flags(metrics):
     """
@@ -24,77 +12,10 @@ def extract_stat_flags(metrics):
 
     return min_stats, max_stats, avg_stats
 
-class ProjectVariables:
-    """
-    A class to manage project-specific variables and Streamlit session state initialization.
-
-    This class initializes and maintains essential variables for the application, including:
-    - A list of available clubs derived from JSON files in a specified directory.
-    - Default values for various shot-related sliders.
-    - Initialization of Streamlit session state variables to ensure consistent application behavior.
-
-    Attributes:
-        clubs_directory (str): Directory path containing club summary JSON files.
-        clubs (list): List of club names derived from JSON filenames.
-        initial_shot_slider (int): Default value for shot-related sliders.
-
-    Session State Variables:
-        p1_club_selectbox (str): Selected club for player 1.
-        p1_total_shots_slider (int): Number of total shots for player 1.
-        p3_number_of_shots_selectbox (int): Number of shots for player 3.
-        p3_dist_metric_selectbox (str): Distance metric for player 3 (default: 'Carry').
-        p3_min_stats_checkbox (bool): Checkbox state for minimum stats display.
-        p3_max_stats_checkbox (bool): Checkbox state for maximum stats display.
-        p3_avg_stats_checkbox (bool): Checkbox state for average stats display.
-    """
-    def __init__(self):
-
-        # Define list of clubs
-        self.clubs_directory = "data/club_summary/"
-        self.clubs = [f.replace('.json', '')
-                      for f in os.listdir(self.clubs_directory)
-                      if os.path.isfile(os.path.join(self.clubs_directory, f))]
-
-        # Define initial state of all shot sliders
-        self.initial_shot_slider = 10
-
-        # Ensure the p1_club_selectbox session state variable is initialized
-        if "p1_club_selectbox" not in st.session_state:
-            st.session_state.p1_club_selectbox = self.clubs[0]
-
-        # Ensure the p1_total_shots_slider session state variable is initialized
-        if "p1_total_shots_slider" not in st.session_state:
-            st.session_state.p1_total_shots_slider = self.initial_shot_slider
-
-        # Ensure the p3_number_of_shots_selectbox session state variable is initialized
-        if "p3_number_of_shots_selectbox" not in st.session_state:
-            st.session_state.p3_number_of_shots_selectbox = self.initial_shot_slider
-
-        # Ensure the p3_number_of_shots_selectbox session state variable is initialized
-        if "p3_dist_metric_selectbox" not in st.session_state:
-            st.session_state.p3_dist_metric_selectbox = 'Carry'
-
-        # Ensure the p3_min_stats_checkbox session state variable is initialized
-        if "p3_min_stats_checkbox" not in st.session_state:
-            st.session_state.p3_min_stats_checkbox = False
-
-        # Ensure the p3_max_stats_checkbox session state variable is initialized
-        if "p3_max_stats_checkbox" not in st.session_state:
-            st.session_state.p3_max_stats_checkbox = False
-
-        # Ensure the p3_avg_stats_checkbox session state variable is initialized
-        if "p3_avg_stats_checkbox" not in st.session_state:
-            st.session_state.p3_avg_stats_checkbox = True
-
-
 def collect_club_trajectory_data(
     club: str,
     total_shots: int
-) -> tuple[pd.DataFrame,
-           pd.DataFrame,
-           list,
-           list,
-           list]:
+) -> tuple[pd.DataFrame, pd.DataFrame, list, list, list]:
     """
     Collects and processes trajectory data for a specified golf club.
 
@@ -120,9 +41,7 @@ def collect_club_trajectory_data(
 
     The trajectory data is stored in Pandas DataFrames, and other metrics are returned as lists.
     """
-    # Read the JSON file
-    with open(f'data/club_summary/{club}.json', 'r') as json_file:
-        data = json.load(json_file)
+    data = BlobClient().read_blob_to_dict(container="golf", input_filename=f"trackman_club_summary/{club}.json")
 
     # Define empty stat arrays
     all_data = []
@@ -219,8 +138,9 @@ def collect_yardage_summary_data(
         - Sorts data by the specified distance metric.
     """
     # Read the JSON file
-    with open(f'data/yardage_summary/latest_{number_of_shots}_shot_summary.json', 'r') as json_file:
-        data = json.load(json_file)
+    data = BlobClient().read_blob_to_dict(
+        container="golf",
+        input_filename=f"trackman_yardage_summary/latest_{number_of_shots}_shot_summary.json")
 
     # Generate dataframe from json data read in
     df = pd.DataFrame([{"Club": list(d.keys())[0], **list(d.values())[0]} for d in data])

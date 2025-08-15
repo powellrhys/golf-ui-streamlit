@@ -5,19 +5,19 @@ import logging
 import re
 
 # Import selenium dependencies
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
     NoSuchElementException,
     TimeoutException
 )
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
 
 # Import project dependencies
-from backend.functions.selenium_driver import SeleniumDriver
-from backend.functions.blob_client import BlobClient
-from shared import Variables
+from .selenium_driver import SeleniumDriver
+# from backend.functions import SeleniumDriver
+from shared import Variables, BlobClient
 
 
 class RoundData(SeleniumDriver, BlobClient):

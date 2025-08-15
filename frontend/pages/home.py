@@ -1,22 +1,10 @@
-# Import python dependencies
-from dotenv import load_dotenv
+# Import python and project dependencies
+from streamlit_components.ui_components import configure_page_config
 import streamlit as st
 
-# Import project dependencies
-from streamlit_components.ui_components import (
-    configure_page_config
-)
-from functions.data_functions import (
-    Variables
-)
-
 # Set page config
-configure_page_config(repository_name='play-cricket',
-                      page_icon='🏏')
-
-# Load environment variables
-load_dotenv()
-vars = Variables()
+configure_page_config(repository_name='golf-ui-streamlit',
+                      page_icon=":golf:")
 
 # Ensure user is authenticated to use application
 if not st.user.is_logged_in:

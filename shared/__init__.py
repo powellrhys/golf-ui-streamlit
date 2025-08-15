@@ -1,3 +1,8 @@
-from .functions import Variables
+from .functions import Variables, BlobClient
+from .interfaces import AbstractBlobClient
 
-__all__ = ["Variables"]
+__all__ = [
+    "AbstractBlobClient",
+    "BlobClient",
+    "Variables"
+]

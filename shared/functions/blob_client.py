@@ -1,15 +1,12 @@
 # Install python dependencies
 from azure.storage.blob import BlobServiceClient
-from typing import (
-    Optional,
-    Union,
-    List
-)
+from typing import Optional, Union, List
 import json
 
 # Import project dependencies
-from backend.interfaces import AbstractBlobClient
-from shared import Variables
+from .variables import Variables
+from ..interfaces.blob_client_base import AbstractBlobClient
+
 
 class BlobClient(AbstractBlobClient, Variables):
     """

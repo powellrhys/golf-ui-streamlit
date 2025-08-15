@@ -12,12 +12,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 
 # Import project dependencies
-from backend.interfaces import AbstractDataCollection
-from backend.functions import (
-    SeleniumDriver,
-    BlobClient
-)
-from shared import Variables
+from backend.functions.selenium_driver import SeleniumDriver
+from ..interfaces.data_collection_base import AbstractDataCollection
+from shared import Variables, BlobClient
 
 
 class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
@@ -193,7 +190,7 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
             except BaseException:
                 time.sleep(3 + (2 ** retry))
 
-        self.logger.error('Failed to collect range session data')
+        self.logger.error(f'Failed to collect range session data for session id {session_id}')
 
 
 class TrackManAggregator(BlobClient):
@@ -283,6 +280,6 @@ class TrackManAggregator(BlobClient):
 
             # Write the list to the JSON file
             self.export_dict_to_blob(
-                data=club_data,
+                data=yardage_book,
                 container='golf',
                 output_filename=f'trackman_yardage_summary/latest_{shots}_shot_summary.json')

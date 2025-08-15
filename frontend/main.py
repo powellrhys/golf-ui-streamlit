@@ -1,17 +1,14 @@
-# Import python dependencies
-from dotenv import load_dotenv
-import streamlit as st
 
-from functions.data_functions import (
-    Variables
-)
-from functions.navigation import (
-    get_navigation
-)
+from pathlib import Path
+import sys
 
-# Load environment variables
-load_dotenv()
-vars = Variables()
+# Add project root to sys.path before any other imports
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from functions import get_navigation # noqa
+import streamlit as st # noqa
 
 # Ensure user is authenticated to use application
 if not st.user.is_logged_in:
