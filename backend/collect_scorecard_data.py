@@ -17,26 +17,32 @@ app = RoundData(logger=logger,
                 headless=True,
                 driver_path=vars.chromedriver_path)
 
+# Login into scorecard site
 logger.info("Logging into golf scorecard application...")
-app.login_to_round_site()
+app.login_to_website()
 logger.info("Login successful\n")
 
+# Navigate to performance tab
 logger.info("Navigating to performance tab...")
 app.navigate_to_performance_tab()
 logger.info("Performance tab successfully loaded\n")
 
+# Load all historic rounds
 logger.info("Loading all historic round data...")
 app.load_all_round_data()
 logger.info("All historic round data loaded\n")
 
+# Collect scorecard urls
 logger.info("Collecting report urls...")
 round_report_links = app.collect_round_urls()
 logger.info("All report urls collected\n")
 
+# Collect scorecard data
 logger.info("Collect scorecard data...")
-app.collect_scorecard_data(round_links=round_report_links[0:1])
+app.collect_scorecard_data(round_links=round_report_links)
 logger.info("Scorecard data collected\n")
 
+# Aggregate round data for home course
 logger.info("Aggregating Hole by Hole Data...")
 aggregator = RoundAggregator(logger=logger)
 aggregator.aggregate_holes_by_course()

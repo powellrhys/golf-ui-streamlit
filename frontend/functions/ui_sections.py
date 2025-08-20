@@ -1,6 +1,6 @@
 # Import dependencies
-from shared import Variables, BlobClient
 from .ui_components import display_club_metrics
+from shared import BlobClient
 from .data_functions import (
     collect_yardage_summary_data,
     collect_club_trajectory_data,
@@ -16,14 +16,37 @@ from functions.plots import (
     plot_club_distribution_stats
 )
 
-def render_trackman_club_analysis(variables: Variables) -> None:
+def render_trackman_club_analysis() -> None:
     """
+    Render an interactive Streamlit dashboard for analyzing TrackMan club data.
+
+    This function generates a web interface that allows the user to:
+        - Select a golf club from available TrackMan session data.
+        - Adjust the number of most recent shots to analyze.
+        - View key metrics for the selected club (carry distance, total distance, ball speed, etc.).
+        - Visualize shot trajectories and shot distributions using interactive plots.
+
+    The function fetches TrackMan data from Azure Blob Storage, processes it using
+    `collect_club_trajectory_data`, and renders visualizations with Plotly and Streamlit.
+
+    User Interface Components:
+        - Club selection dropdown.
+        - Slider to select the number of most recent shots.
+        - Metric boxes showing aggregated statistics.
+        - Expandable sections for:
+            - Shot trajectories.
+            - Shot distribution contours.
+
+    Returns:
+        None
     """
     # Define page title
     st.title('Trackman Club Analysis')
 
+    # Define columns object
     columns = st.columns([2, 1, 2])
 
+    # Collect a list of clubs used on the trackman range
     blob_files = BlobClient().list_blob_filenames(container_name="golf", directory_path="trackman_club_summary")
     clubs = [f.replace('.json', '').split("/")[-1] for f in blob_files]
 
@@ -62,28 +85,52 @@ def render_trackman_club_analysis(variables: Variables) -> None:
 
 def render_club_yardage_analysis() -> None:
     """
+    Render an interactive Streamlit dashboard for analyzing TrackMan club yardage data.
+
+    This function provides a web interface that allows users to:
+        - Select which statistics to display (Minimum, Maximum, Average) for club shots.
+        - Choose the number of most recent shots to include in the analysis.
+        - Select the distribution metric to visualize (Carry or Total Distance).
+
+    The function processes TrackMan yardage summary data by:
+        - Extracting the selected statistics flags using `extract_stat_flags`.
+        - Collecting and transforming club yardage data via `collect_yardage_summary_data`.
+
+    User Interface Components:
+        - Segmented control for selecting stats to display (Min, Max, Avg).
+        - Dropdown for choosing the number of shots to evaluate.
+        - Dropdown for selecting the club distribution metric.
+        - Expandable section displaying a table of yardage statistics.
+        - Expandable section displaying plots of club distribution based on the selected metric.
+
+    Returns:
+        None
     """
+    # Define column object
     columns = st.columns([1, 1, 1])
 
-    with columns[1]:
-        # Define number of shots select box
-        number_of_shots = st.selectbox(
-            label='Number of shot to evaluate',
-            options=[10, 20, 30, 40, 50, 100]
-        )
-
-    with columns[2]:
-        # Define metric select box
-        dist_metric = st.selectbox(
-            label='Club Distribution Metric',
-            options=['Carry', 'Distance']
-        )
+    # Render the display stats segment control object in the first column
     with columns[0]:
         options = ["Min Stats", "Max Stats", "Avg Stats"]
         metrics = st.segmented_control(
             label="Display Stats", options=options, selection_mode="multi", default="Avg Stats"
         )
 
+    # Render number of shots select box within the middle column
+    with columns[1]:
+        number_of_shots = st.selectbox(
+            label='Number of shot to evaluate',
+            options=[10, 20, 30, 40, 50, 100]
+        )
+
+    # Render the distribution metric in the final column
+    with columns[2]:
+        dist_metric = st.selectbox(
+            label='Club Distribution Metric',
+            options=['Carry', 'Distance']
+        )
+
+    # Collect boolean matrix of stats to render
     min_stats, max_stats, avg_stats = extract_stat_flags(metrics)
 
     # Collect and transform club summary yardage data

@@ -1,3 +1,4 @@
+# Import dependencies
 from .functions import (
     render_trackman_club_analysis,
     collect_club_trajectory_data,

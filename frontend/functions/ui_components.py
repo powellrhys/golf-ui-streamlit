@@ -1,4 +1,4 @@
-# Import python packages
+# Import dependencies
 import streamlit as st
 
 def display_club_metrics(

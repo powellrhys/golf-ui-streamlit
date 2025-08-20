@@ -1,12 +1,14 @@
-from abc import ABC, abstractmethod
+# Import dependencies
 from typing import List, Union, Optional
+from abc import ABC, abstractmethod
 
 class AbstractBlobClient(ABC):
     """
-    Abstract base class for blob storage clients.
-    Defines the interface for interacting with blob storage backends.
-    """
+    Abstract base class defining the interface for interacting with blob storage backends.
 
+    Subclasses must implement methods for listing blobs, uploading JSON data,
+    and reading JSON data from the storage backend.
+    """
     @abstractmethod
     def list_blob_filenames(self, container_name: str, directory_path: Optional[str] = None) -> List[str]:
         """

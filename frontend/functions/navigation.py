@@ -3,6 +3,16 @@ import streamlit as st
 
 def get_navigation() -> st.navigation:
     """
+    Build and return a Streamlit navigation object for the application.
+
+    This method defines the navigation structure of the app by mapping
+    page groups (e.g., "Overview", "Trackman") to their corresponding
+    Streamlit pages. It then constructs a `st.navigation` object that
+    can be used to render and manage page routing within the UI.
+
+    Returns:
+        st.navigation: A Streamlit navigation object containing the
+        configured pages and navigation hierarchy.
     """
     # Construct pages dictionary
     pages = {

@@ -1,4 +1,4 @@
-
+# Import dependencies
 from pathlib import Path
 import sys
 
@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# Import further dependencies following parent system path change
 from functions import get_navigation # noqa
 import streamlit as st # noqa
 

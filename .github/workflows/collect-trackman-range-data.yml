@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Check out codebasehow 
+      # Check out codebase
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -46,7 +46,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Run data collection script - Scorecard
+      # Run data collection script - Trackman
       - name: Run Data Collection Script
         env:
           chromedriver_path: "/usr/bin/chromedriver"

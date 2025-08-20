@@ -1,4 +1,10 @@
-# Import python dependencies
+# Import dependencies
+from ..interfaces.data_collection_base import AbstractDataCollection
+from selenium.webdriver.support import expected_conditions as EC
+from backend.functions.selenium_driver import SeleniumDriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from shared import Variables, BlobClient
 from datetime import datetime
 import statistics as stat
 import logging
@@ -6,19 +12,17 @@ import requests
 import time
 import json
 
-# Import selenium dependencies
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-
-# Import project dependencies
-from backend.functions.selenium_driver import SeleniumDriver
-from ..interfaces.data_collection_base import AbstractDataCollection
-from shared import Variables, BlobClient
-
-
 class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
     """
+    Client for collecting and uploading TrackMan golf range session data.
+
+    This class uses Selenium to log in to the TrackMan portal, collect range session IDs,
+    retrieve session data via the TrackMan API, and export the data to Azure Blob Storage.
+
+    Attributes:
+        driver (WebDriver): Selenium WebDriver instance for web automation.
+        logger (logging.Logger): Logger for tracking events and errors.
+        vars (Variables): Configuration variables (e.g., credentials).
     """
     def __init__(
         self,
@@ -27,17 +31,24 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
         headless: bool = False
     ) -> None:
         """
+        Initialize the TrackMan client with Selenium WebDriver and logger.
+
+        Args:
+            logger (logging.Logger): Logger instance for logging messages.
+            driver_path (str, optional): Path to the ChromeDriver executable. Defaults to 'chromedriver.exe'.
+            headless (bool, optional): Whether to run the browser in headless mode. Defaults to False.
         """
         super().__init__()
         self.driver = self.configure_driver(driver_path=driver_path, headless=headless)
         self.logger = logger
         self.vars = Variables()
 
-    def login_to_website(
-        self,
-        logger: logging.Logger = None
-    ) -> None:
+    def login_to_website(self) -> None:
         """
+        Log in to the TrackMan portal using credentials from Variables.
+
+        Raises:
+            Exception: If login fails due to any unexpected error.
         """
         try:
             # Navigate the trackman report page
@@ -55,15 +66,22 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
             password_field.send_keys(self.vars.trackman_password)
 
             # Trigger JavaScript directly to simulate the button click
-            # time.sleep(1)
             self.driver.execute_script("signinBtnClicked()")
 
+        # Handle exception if driver fails to login
         except BaseException:
             self.logger.error('Failed to login to trackman')
             raise
 
     def collect_trackman_access_token(self) -> str:
         """
+        Collect the TrackMan API access token for authenticated requests.
+
+        Returns:
+            str: Access token string.
+
+        Raises:
+            Exception: If the access token cannot be retrieved.
         """
         # Navigate to authentication url
         self.driver.get("https://portal.trackmangolf.com/api/account/me")
@@ -78,6 +96,7 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
 
             return json_data['accessToken']
 
+        # Handle exception if driver fails to collect access token
         except BaseException as e:
             self.logger.error(f"Failed to collect trackman access token - {e}")
 
@@ -86,6 +105,16 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
         access_token: str
     ) -> list:
         """
+        Collect a list of range session IDs using the TrackMan GraphQL API.
+
+        Args:
+            access_token (str): TrackMan API access token.
+
+        Returns:
+            list: List of range session IDs.
+
+        Raises:
+            Exception: If session IDs cannot be retrieved after multiple retries.
         """
         # Define the URL for the GraphQL endpoint
         url = "https://api.trackmangolf.com/graphql"
@@ -141,6 +170,7 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
             except BaseException:
                 time.sleep(3 + (2 ** retry))
 
+        # Handle error if failure occured
         self.logger.error('Failed to collect range session ids')
         raise
 
@@ -149,6 +179,15 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
         session_id: str
     ) -> None:
         """
+        Collect and upload data for a specific range session.
+
+        Retrieves session data from the TrackMan API and uploads it to Azure Blob Storage.
+
+        Args:
+            session_id (str): The ID of the range session to collect.
+
+        Raises:
+            Exception: If session data cannot be retrieved or uploaded.
         """
         # URL and API endpoint
         url = "https://golf-player-activities.trackmangolf.com/api/reports/getreport"
@@ -195,15 +234,34 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
 
 class TrackManAggregator(BlobClient):
     """
+    Aggregates and summarizes TrackMan session data from Azure Blob Storage.
+
+    Provides methods to extract clubs used, summarize range data per club,
+    and generate yardage book summaries.
+
+    Attributes:
+        logger (logging.Logger): Logger for tracking events and errors.
+        vars (Variables): Configuration variables.
     """
     def __init__(self, logger: logging.Logger):
+        """
+        Initialize the TrackManAggregator with a logger and variable configuration.
+
+        Args:
+            logger (logging.Logger): Logger instance for logging messages.
+        """
         super().__init__()
         self.logger = logger
         self.vars = Variables()
 
     def collect_clubs_used_at_range(self) -> list:
         """
+        Collect a sorted list of unique clubs used across all range sessions.
+
+        Returns:
+            list: Alphabetically sorted list of clubs used.
         """
+        # Collect a list of files in a blob container
         files = self.list_blob_filenames(container_name="golf", directory_path="trackman_session_summary")
 
         clubs = []
@@ -221,11 +279,14 @@ class TrackManAggregator(BlobClient):
 
         return clubs
 
-    def summarise_range_club_data(
-        self,
-        club: str
-    ) -> None:
+    def summarise_range_club_data(self, club: str) -> None:
         """
+        Summarize all range session data for a specific club.
+
+        Filters strokes by the given club and exports the sorted summary to Blob Storage.
+
+        Args:
+            club (str): Club name to summarize data for.
         """
         # List all files in the full_session_summary directory
         files = self.list_blob_filenames(container_name="golf", directory_path="trackman_session_summary")
@@ -249,11 +310,15 @@ class TrackManAggregator(BlobClient):
             container='golf',
             output_filename=f'trackman_club_summary/{club}.json')
 
-    def collect_yardage_book_data(
-        self,
-        clubs: str
-    ) -> None:
+    def collect_yardage_book_data(self, clubs: str) -> None:
         """
+        Generate yardage book summaries for multiple clubs using recent shots.
+
+        Aggregates statistics such as average carry, max/min distance, ball speed, launch angle,
+        and exports JSON summaries for the latest 10, 20, 30, 40, 50, and 100 shots per club.
+
+        Args:
+            clubs (str): List of club names to include in the yardage book summaries.
         """
         # Iterate through clubs and latest x amount of shots
         for shots in [10, 20, 30, 40, 50, 100]:

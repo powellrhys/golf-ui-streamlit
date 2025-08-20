@@ -3,9 +3,27 @@ from shared import BlobClient
 import pandas as pd
 
 
-def extract_stat_flags(metrics):
+def extract_stat_flags(metrics) -> list[bool, bool, bool]:
     """
+    Determine whether minimum, maximum, and average statistics are present
+    in a given metrics collection.
+
+    This function checks if the strings `"Min Stats"`, `"Max Stats"`, and
+    `"Avg Stats"` exist in the provided `metrics` object (e.g., list, dict keys,
+    or any iterable containing metric names). It returns boolean flags for
+    each of these statistics.
+
+    Args:
+        metrics (iterable): A collection of metric identifiers (such as a list
+            of strings or dictionary keys).
+
+    Returns:
+        tuple:
+            - bool: True if `"Min Stats"` is present, otherwise False.
+            - bool: True if `"Max Stats"` is present, otherwise False.
+            - bool: True if `"Avg Stats"` is present, otherwise False.
     """
+    # Determine if stats present in list
     min_stats = "Min Stats" in metrics
     max_stats = "Max Stats" in metrics
     avg_stats = "Avg Stats" in metrics

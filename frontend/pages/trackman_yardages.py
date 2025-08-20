@@ -1,15 +1,9 @@
-# Import python dependencies
+# Import dependencies
+from streamlit_components.ui_components import configure_page_config
+from functions.ui_sections import render_club_yardage_analysis
+from shared import Variables
 import streamlit as st
 
-# Import project dependencies
-from streamlit_components.ui_components import (
-    configure_page_config
-)
-from shared import Variables
-
-from functions.ui_sections import (
-    render_club_yardage_analysis
-)
 # Collect all project variables
 variables = Variables()
 
@@ -24,4 +18,5 @@ if not st.user.is_logged_in:
 # If logged in, render page components
 if st.user.is_logged_in:
 
+    # Render yardage analysis section
     render_club_yardage_analysis()

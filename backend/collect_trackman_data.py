@@ -37,6 +37,7 @@ for i, range_id in enumerate(session_ids):
     logger.info(f'{i + 1}/{len(session_ids)} Collecting range data for session: {range_id}...')
     app.collect_range_session_data(session_id=range_id)
 
+# Collect a list of clubs used in a trackman range
 logger.info("Collecting list of clubs used at Trackman Range...")
 aggregator = TrackManAggregator(logger=logger)
 clubs = aggregator.collect_clubs_used_at_range()

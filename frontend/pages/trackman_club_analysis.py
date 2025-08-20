@@ -18,4 +18,5 @@ if not st.user.is_logged_in:
 # If logged in, render page components
 if st.user.is_logged_in:
 
-    render_trackman_club_analysis(variables=variables)
+    # Render trackman club analysis section
+    render_trackman_club_analysis()

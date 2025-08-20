@@ -1,11 +1,18 @@
-# Import python dependencies
+# Import dependencies
 from selenium.webdriver.chrome.webdriver import WebDriver
 from abc import ABC, abstractmethod
 
 class AbstractSeleniumDriver(ABC):
     """
-    Abstract interface for configuring and returning a Selenium WebDriver.
+    Abstract base class that defines the contract for creating and configuring
+    Selenium WebDriver instances.
+
+    Any subclass must implement the `configure_driver` method to ensure a
+    consistent setup process (e.g., setting driver paths, enabling headless
+    mode, or applying browser-specific options) before returning a usable
+    WebDriver object.
     """
+
     @abstractmethod
     def configure_driver(
         self,
@@ -13,13 +20,20 @@ class AbstractSeleniumDriver(ABC):
         headless: bool = False
     ) -> WebDriver:
         """
-        Configure and return a Selenium WebDriver instance.
+        Create and configure a Selenium WebDriver instance.
+
+        This method must be implemented by subclasses to initialize a browser
+        driver with custom configuration, such as the executable path and
+        whether the browser should run in headless mode.
 
         Args:
-            driver_path (str): Path to the chromedriver executable.
-            headless (bool): Whether to run the browser in headless mode.
+            driver_path (str, optional): Path to the ChromeDriver executable.
+                Defaults to 'chromedriver.exe'.
+            headless (bool, optional): If True, launches the browser without
+                a visible UI. Defaults to False.
 
         Returns:
-            WebDriver: Configured Selenium WebDriver instance.
+            WebDriver: A fully configured Selenium WebDriver instance, ready
+            for use in automation tasks.
         """
         pass
