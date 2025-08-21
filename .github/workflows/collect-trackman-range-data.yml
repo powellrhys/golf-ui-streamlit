@@ -50,7 +50,7 @@ jobs:
       - name: Run Data Collection Script
         env:
           chromedriver_path: "/usr/bin/chromedriver"
-          blob_account_connection_string: ${{ secrets.blob_account_connection_string }}
+          blob_storage_connection_string: ${{ secrets.blob_storage_connection_string }}
           golf_course_name: ${{ secrets.golf_course_name }}
           trackman_username: ${{ secrets.trackman_username }}
           trackman_password: ${{ secrets.trackman_password }}
