@@ -59,7 +59,8 @@ def collect_club_trajectory_data(
 
     The trajectory data is stored in Pandas DataFrames, and other metrics are returned as lists.
     """
-    data = BlobClient().read_blob_to_dict(container="golf", input_filename=f"trackman_club_summary/{club}.json")
+    data = BlobClient(source="frontend") \
+        .read_blob_to_dict(container="golf", input_filename=f"trackman_club_summary/{club}.json")
 
     # Define empty stat arrays
     all_data = []
@@ -156,7 +157,7 @@ def collect_yardage_summary_data(
         - Sorts data by the specified distance metric.
     """
     # Read the JSON file
-    data = BlobClient().read_blob_to_dict(
+    data = BlobClient(source="frontend").read_blob_to_dict(
         container="golf",
         input_filename=f"trackman_yardage_summary/latest_{number_of_shots}_shot_summary.json")
 

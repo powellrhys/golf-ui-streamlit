@@ -5,7 +5,7 @@ from typing import Optional, Union, List
 from .variables import Variables
 import json
 
-class BlobClient(AbstractBlobClient, Variables):
+class BlobClient(AbstractBlobClient):
     """
     A client for interacting with Azure Blob Storage.
 
@@ -27,7 +27,7 @@ class BlobClient(AbstractBlobClient, Variables):
         blob_account_connection_string (str): Inherited from `Variables`,
             used to authenticate and connect to the Azure Blob account.
     """
-    def __init__(self):
+    def __init__(self, source: str = "backend"):
         """
         Initialize the BlobClient instance.
 
@@ -36,6 +36,7 @@ class BlobClient(AbstractBlobClient, Variables):
         required configuration variables are set up before use.
         """
         super().__init__()
+        self.vars = Variables(source=source)
 
     def list_blob_filenames(
         self,
@@ -55,7 +56,7 @@ class BlobClient(AbstractBlobClient, Variables):
             List[str]: List of blob names matching the prefix.
         """
         # Create blob service client + container client
-        blob_service_client = BlobServiceClient.from_connection_string(self.blob_account_connection_string)
+        blob_service_client = BlobServiceClient.from_connection_string(self.vars.blob_account_connection_string)
         container_client = blob_service_client.get_container_client(container_name)
 
         # Collect a list of files in a container
@@ -92,7 +93,7 @@ class BlobClient(AbstractBlobClient, Variables):
 
         # Connect to Azure Blob Storage
         blob_service_client = BlobServiceClient.from_connection_string(
-            self.blob_account_connection_string)
+            self.vars.blob_account_connection_string)
 
         # Connect to the specific blob in the container
         blob_client = blob_service_client.get_blob_client(
@@ -129,7 +130,7 @@ class BlobClient(AbstractBlobClient, Variables):
         """
         # Define blob service client
         blob_service_client = BlobServiceClient.from_connection_string(
-            self.blob_account_connection_string
+            self.vars.blob_account_connection_string
         )
 
         # Define container client
