@@ -1,0 +1,58 @@
+name: Collect Trackman Range Data
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+  push:
+    paths:
+      - 'backend/**'
+      - ".github/workflows/collect-trackman-range-data.yml"
+  pull_request:
+    paths:
+      - 'backend/**'
+      - ".github/workflows/collect-trackman-range-data.yml"
+
+jobs:
+  collect_trackaman_range_data:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out codebase
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
+
+      # Configure and install Chrome
+      - name: Set up Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+
+      # Configure ChromeDriver
+      - name: Set up ChromeDriver
+        run: |
+          sudo apt-get install -y chromium-chromedriver
+          chromedriver --version
+
+      # Install project dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Run data collection script - Trackman
+      - name: Run Data Collection Script
+        env:
+          chromedriver_path: "/usr/bin/chromedriver"
+          blob_account_connection_string: ${{ secrets.blob_account_connection_string }}
+          golf_course_name: ${{ secrets.golf_course_name }}
+          trackman_username: ${{ secrets.trackman_username }}
+          trackman_password: ${{ secrets.trackman_password }}
+        run: |
+          python -m backend.collect_trackman_data
