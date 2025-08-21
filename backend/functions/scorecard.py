@@ -10,8 +10,8 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException
 )
+from datetime import datetime, date
 from collections import defaultdict
-from datetime import datetime
 import logging
 import re
 
@@ -274,7 +274,7 @@ class RoundData(AbstractDataCollection, SeleniumDriver, BlobClient):
 
         return gir_results
 
-    def get_round_date(self) -> datetime.date | None:
+    def get_round_date(self) -> date | None:
         """
         Extracts the round date from the current round page.
 

@@ -6,11 +6,11 @@ on:
   push:
     paths:
       - 'backend/**'
-      - ".github/workflows/collect-scorecard-data.yml"
+      - ".github/workflows/collect-trackman-range-data.yml"
   pull_request:
     paths:
       - 'backend/**'
-      - ".github/workflows/collect-scorecard-data.yml"
+      - ".github/workflows/collect-trackman-range-data.yml"
 
 jobs:
   collect_trackaman_range_data:
