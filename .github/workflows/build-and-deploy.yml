@@ -45,7 +45,7 @@ jobs:
     secrets:
       docker_password: ${{ secrets.docker_password }}
     with:
-      image_name: strava-streamlit-frontend
+      image_name: golf-streamlit-frontend
       docker_file_path: frontend/Dockerfile
 
   # Execute Plan
