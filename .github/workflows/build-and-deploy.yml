@@ -48,17 +48,17 @@ jobs:
       image_name: strava-streamlit-frontend
       docker_file_path: frontend/Dockerfile
 
-  # # Execute Plan
-  # plan:
-  #   name: Plan
-  #   needs: ['build-application']
-  #   uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@main
-  #   with:
-  #     tf_directory: 'infra'
-  #     tf_vars_file_name: 'values.tfvars'
-  #   secrets:
-  #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-  #     app_service_app_settings: ${{ secrets.app_service_app_settings }}
+  # Execute Plan
+  plan:
+    name: Plan
+    needs: ['build-application']
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@main
+    with:
+      tf_directory: 'infra'
+      tf_vars_file_name: 'values.tfvars'
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      app_service_app_settings: ${{ secrets.app_service_app_settings }}
 
   # # Execute apply
   # apply:
