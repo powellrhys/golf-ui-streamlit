@@ -5,7 +5,7 @@ from shared import Variables
 import streamlit as st
 
 # Collect all project variables
-variables = Variables()
+variables = Variables(source="frontend")
 
 # Set page config
 configure_page_config(repository_name='golf-ui-streamlit',

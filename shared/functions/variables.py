@@ -1,5 +1,6 @@
 # Install python dependencies
 from dotenv import load_dotenv
+import streamlit as st
 import os
 
 load_dotenv()
@@ -13,7 +14,7 @@ class Variables():
     general backend settings, golf round site credentials, Trackman credentials,
     and Azure Blob Storage connection details.
     """
-    def __init__(self):
+    def __init__(self, source: str = "backend"):
         """
         Initialize and load all required environment variables into attributes.
 
@@ -30,20 +31,24 @@ class Variables():
             trackman_username (str): Username for Trackman login.
             trackman_password (str): Password for Trackman login.
         """
+        # Shared variables
+        if source == "backend":
+            self.blob_account_connection_string = os.getenv("blob_storage_connection_string")
+            self.golf_course_name = os.getenv("golf_course_name")
+        else:
+            self.blob_account_connection_string = st.secrets["general"]["blob_storage_connection_string"]
+            self.golf_course_name = st.secrets["general"]["golf_course_name"]
+
         # General Backend variables
         self.chromedriver_path = os.getenv("chromedriver_path", default="chromedriver.exe")
 
-        # Shared variables
-        self.blob_account_connection_string = os.getenv("blob_account_connection_string")
-        self.golf_course_name = os.getenv("golf_course_name")
-
-        # Scorecard variables
+        # Backend - Scorecard variables
         self.round_site_base_url = os.getenv("round_site_base_url")
         self.round_site_username = os.getenv("round_site_username")
         self.round_site_password = os.getenv("round_site_password")
         self.round_site_player_name = os.getenv("round_site_player_name")
 
-        # Trackman variables
+        # Backend - Trackman variables
         self.trackman_username = os.getenv("trackman_username")
         self.trackman_password = os.getenv("trackman_password")
 
