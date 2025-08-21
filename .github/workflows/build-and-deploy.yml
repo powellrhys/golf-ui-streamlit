@@ -1,0 +1,91 @@
+name: Build & Deploy Application
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+  push:
+    branches:
+      - main
+      - feature/*
+
+jobs:
+  # Lint yaml codebase
+  lint-yaml:
+    name: Lint Yaml Pipelines
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint YAML
+        uses: powellrhys/powellrhys-iac/.github/actions/lint-yaml@main
+        with:
+          config_path: '.yamllint.yml'
+
+  # Lint python codebase
+  lint-python:
+    name: Lint Python Codebase
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint Python
+        uses: powellrhys/powellrhys-iac/.github/actions/lint-python@main
+        with:
+          config_path: '.flake8'
+          code_directory: '.'
+
+  # Build & Push Application
+  build-application:
+    name: Build Application
+    needs: ['lint-yaml', 'lint-python']
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-build-and-push-container.yml@main
+    secrets:
+      docker_password: ${{ secrets.docker_password }}
+    with:
+      image_name: strava-streamlit-frontend
+      docker_file_path: frontend/Dockerfile
+
+  # # Execute Plan
+  # plan:
+  #   name: Plan
+  #   needs: ['build-application']
+  #   uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@main
+  #   with:
+  #     tf_directory: 'infra'
+  #     tf_vars_file_name: 'values.tfvars'
+  #   secrets:
+  #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  #     app_service_app_settings: ${{ secrets.app_service_app_settings }}
+
+  # # Execute apply
+  # apply:
+  #   needs: ['plan']
+  #   name: Apply
+  #   uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@main
+  #   with:
+  #     should_apply: 'true'
+  #     release_environment: 'PROD'
+  #     tf_directory: 'infra'
+  #     tf_vars_file_name: 'values.tfvars'
+  #   secrets:
+  #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  #     app_service_app_settings: ${{ secrets.app_service_app_settings }}
+
+  # # Lint python codebase
+  # restart-appservice:
+  #   needs: ['apply']
+  #   name: Restart App Service
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Restart App
+  #       uses: powellrhys/powellrhys-iac/.github/actions/restart-appservice@main
+  #       with:
+  #         azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  #         webapp_name: strava-streamlit-frontend
+  #         resource_group: powellrhys-app-service-plan-rg
