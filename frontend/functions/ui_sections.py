@@ -47,7 +47,8 @@ def render_trackman_club_analysis() -> None:
     columns = st.columns([2, 1, 2])
 
     # Collect a list of clubs used on the trackman range
-    blob_files = BlobClient().list_blob_filenames(container_name="golf", directory_path="trackman_club_summary")
+    blob_files = BlobClient(source="frontend") \
+        .list_blob_filenames(container_name="golf", directory_path="trackman_club_summary")
     clubs = [f.replace('.json', '').split("/")[-1] for f in blob_files]
 
     # Render select box within first column
