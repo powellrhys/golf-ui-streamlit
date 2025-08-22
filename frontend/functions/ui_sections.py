@@ -1,20 +1,14 @@
 # Import dependencies
+from streamlit_components.plot_functions import PlotlyPlotter
+from functions.plots import plot_final_trajectory_contour
 from .ui_components import display_club_metrics
-from shared import BlobClient
 from .data_functions import (
     collect_yardage_summary_data,
     collect_club_trajectory_data,
     extract_stat_flags
 )
+from shared import BlobClient
 import streamlit as st
-
-from functions.plots import (
-    plot_final_trajectory_contour,
-    plot_shot_trajectories
-)
-from functions.plots import (
-    plot_club_distribution_stats
-)
 
 def render_trackman_club_analysis() -> None:
     """
@@ -75,8 +69,14 @@ def render_trackman_club_analysis() -> None:
     # Define shot trajectory expander
     with st.expander(label='Shot Trajectory', expanded=True):
 
-        # Plot all trajectories using Plotly Express
-        plot_shot_trajectories(df=final_flight_df)
+        # Plot trajectory data
+        st.plotly_chart(PlotlyPlotter(
+            df=final_flight_df,
+            x='x',
+            y='y',
+            color='Shot',
+            labels={'x': 'Horizontal Distance (m)',
+                    'y': 'Vertical Distance (m)'}).plot_line())
 
     # Define shot distribution expander
     with st.expander(label='Shot Distribution', expanded=True):
@@ -151,6 +151,10 @@ def render_club_yardage_analysis() -> None:
     with st.expander(label='Yardage Table',
                      expanded=True):
 
+        # Map column headers
+        yardage_df.columns = yardage_df.columns.str.replace("_", " ").str.upper()
+        yardage_df.columns = yardage_df.columns + " (m)"
+
         # Render yardage table
         st.dataframe(data=yardage_df,
                      hide_index=True)
@@ -159,6 +163,10 @@ def render_club_yardage_analysis() -> None:
     with st.expander(label='Club Distribution',
                      expanded=True):
 
-        # Plot distribution stats
-        plot_club_distribution_stats(df=df_long,
-                                     dist_metric=dist_metric)
+        # Plot club distribution stats
+        st.plotly_chart(PlotlyPlotter(
+            df=df_long,
+            x="Club",
+            y=dist_metric,
+            color="Club",
+            markers='o').plot_line())

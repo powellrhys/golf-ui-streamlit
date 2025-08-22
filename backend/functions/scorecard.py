@@ -83,7 +83,7 @@ class RoundData(AbstractDataCollection, SeleniumDriver, BlobClient):
                 For other WebDriver-related errors during the login process.
         """
         # Navigate the trackman report page
-        self.driver.get(self.round_site_base_url + "/users/sign_in")
+        self.driver.get(self.vars.round_site_base_url + "/users/sign_in")
 
         # Zoom out to load all html components into view
         self.driver.execute_script("document.body.style.zoom='50%'")
@@ -94,7 +94,7 @@ class RoundData(AbstractDataCollection, SeleniumDriver, BlobClient):
             # Find html element, clear element and insert values
             login_element = self.driver.find_element(By.NAME, id)
             login_element.clear()
-            login_element.send_keys(self[var])
+            login_element.send_keys(self.vars[var])
 
         # Find sign in button and click it
         wait = WebDriverWait(self.driver, 10)
@@ -117,7 +117,7 @@ class RoundData(AbstractDataCollection, SeleniumDriver, BlobClient):
                 the target URL is invalid).
         """
         # Navigate the trackman report page
-        self.driver.get(self.round_site_base_url + "/performance/rounds")
+        self.driver.get(self.vars.round_site_base_url + "/performance/rounds")
 
     def load_all_round_data(self):
         """
@@ -535,7 +535,7 @@ class RoundData(AbstractDataCollection, SeleniumDriver, BlobClient):
         return holes
 
 
-class RoundAggregator(BlobClient, Variables):
+class RoundAggregator(BlobClient):
     """
     Aggregates and restructures golf round data from blob storage.
 
@@ -563,6 +563,7 @@ class RoundAggregator(BlobClient, Variables):
         """
         super().__init__()
         self.logger = logger
+        self.vars = Variables()
 
     def aggregate_holes_by_course(self) -> None:
         """
@@ -598,7 +599,7 @@ class RoundAggregator(BlobClient, Variables):
         for filename in self.list_blob_filenames(container_name="golf", directory_path=directory_path):
 
             # Make sure container file is a json file and has the course of interest in the name
-            if filename.lower().endswith(".json") and self.golf_course_name.lower() in filename.lower():
+            if filename.lower().endswith(".json") and self.vars.golf_course_name.lower() in filename.lower():
 
                 # Extract date from filename using regex
                 match = re.search(r"(\d{4}-\d{2}-\d{2})\.json$", filename)
@@ -639,4 +640,4 @@ class RoundAggregator(BlobClient, Variables):
             self.export_dict_to_blob(
                 data=sorted_holes,
                 container='golf',
-                output_filename=f'{self.golf_course_name}_golf_course_hole_summary/hole_{hole_num}.json')
+                output_filename=f'{self.vars.golf_course_name}_golf_course_hole_summary/hole_{hole_num}.json')
