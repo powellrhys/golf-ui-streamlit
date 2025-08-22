@@ -7,8 +7,48 @@ from .data_functions import (
     collect_club_trajectory_data,
     extract_stat_flags
 )
-from shared import BlobClient
+from shared import BlobClient, Variables
 import streamlit as st
+
+def render_course_analysis(vars: Variables) -> None:
+    """
+    """
+    # Define page title
+    st.title(f"{vars.golf_course_name.capitalize()} GC Analysis")
+
+    columns = st.columns([1, 3])
+
+    with columns[0]:
+        hole = st.selectbox(label="Hole",
+                            options=[f"Hole: {i + 1}" for i in range(18)])
+
+    data = BlobClient().read_blob_to_dict(
+        container="golf",
+        input_filename=f"{vars.golf_course_name}_golf_course_hole_summary/{hole.lower().replace(": ", "_")}.json")
+    
+    shots = [int(stroke[vars.round_site_player_name])
+             for stroke in data
+             if str(stroke[vars.round_site_player_name]).isdigit()]
+
+    putts = [int(stroke["Putts"]) for stroke in data if str(stroke["Putts"]).isdigit()]
+
+    gir = [is_gir["Gir"] for is_gir in data]
+
+    hole_overview = {
+        "Stroke Index": data[0]["S. index"],
+        "Par": data[0]["Par"],
+        "Average Strokes": float(f"{sum(shots)/len(shots):.2f}"),
+        "Average Putts": float(f"{sum(putts)/len(putts):.2f}"),
+        "GIR (%)": float(f"{(sum(gir) / len(gir)) * 100:.2f}")
+    }
+
+    columns = st.columns(5)
+
+    for ind, (label, value) in enumerate(hole_overview.items()):
+        with columns[ind]:
+            st.metric(label=label.capitalize(), value=value, border=True)
+
+    st.json(data)
 
 def render_trackman_club_analysis() -> None:
     """
@@ -83,6 +123,39 @@ def render_trackman_club_analysis() -> None:
 
         # Generate plotly go contour plot
         plot_final_trajectory_contour(df=final_end_df)
+
+def render_trackman_session_analysis() -> None:
+    """
+    """
+    # Define page title
+    st.title('Trackman Session Analysis')
+
+    # Define columns object
+    columns = st.columns([2, 2, 1])
+
+    # Collect a list of clubs used on the trackman range
+    blob_files = BlobClient(source="frontend") \
+        .list_blob_filenames(container_name="golf", directory_path="trackman_session_summary")
+
+    # Create sessions dictionary
+    sessions = [{"date": f.replace('.json', '').split("/")[-1].split("-session-")[0], "file_name": f}
+                for f in blob_files]
+
+    with columns[0]:
+        session_date = st.selectbox(
+            label='Trackman Session Date',
+            options=[session['date'] for session in sessions]
+        )
+
+        filename = [entry["file_name"] for entry in sessions if entry["date"] == session_date][0]
+
+    data = BlobClient(source="frontend").read_blob_to_dict(container="golf", input_filename=filename)["StrokeGroups"]
+
+    with columns[1]:
+        club = st.selectbox(
+            label='Trackman Session Date',
+            options=list(set([shot["Club"] for shot in data]))
+        )
 
 def render_club_yardage_analysis() -> None:
     """

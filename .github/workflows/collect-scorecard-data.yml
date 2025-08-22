@@ -52,6 +52,7 @@ jobs:
           chromedriver_path: "/usr/bin/chromedriver"
           blob_storage_connection_string: ${{ secrets.blob_storage_connection_string }}
           golf_course_name: ${{ secrets.golf_course_name }}
+          round_site_player_name: "Rhys"
           round_site_base_url: ${{ vars.round_site_base_url }}
           round_site_username: ${{ secrets.round_site_username }}
           round_site_password: ${{ secrets.round_site_password }}

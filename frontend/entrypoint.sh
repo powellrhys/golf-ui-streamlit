@@ -9,6 +9,7 @@ cat <<EOF > /app/.streamlit/secrets.toml
 [general]
 blob_storage_connection_string = "${BLOB_STORAGE_CONNECTION_STRING:-}"
 golf_course_name= "${GOLF_COURSE_NAME:-}"
+round_site_player_name = "${ROUND_SITE_PLAYER_NAME:-}"
 
 [auth]
 redirect_uri = "${REDIRECT_URI:-}"

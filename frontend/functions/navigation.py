@@ -1,7 +1,8 @@
 # Import python dependencies
+from shared import Variables
 import streamlit as st
 
-def get_navigation() -> st.navigation:
+def get_navigation(vars: Variables) -> st.navigation:
     """
     Build and return a Streamlit navigation object for the application.
 
@@ -21,7 +22,10 @@ def get_navigation() -> st.navigation:
             st.Page("pages/trackman_club_analysis.py", title="Club Analysis"),
             st.Page("pages/trackman_session_analysis.py", title="Session Analysis"),
             st.Page("pages/trackman_yardages.py", title="Yardages Analysis")
-        ]
+        ],
+        f"{vars.golf_course_name.capitalize()} Golf Course Analysis": [
+            st.Page(page="pages/course_hole_by_hole_analysis.py",
+                    title="Hole by Hole Analysis")]
     }
 
     # Construct streamlit navigation object

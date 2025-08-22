@@ -274,6 +274,28 @@ class RoundData(AbstractDataCollection, SeleniumDriver, BlobClient):
 
         return gir_results
 
+    def parse_strokes(self, cell_elements) -> list[str]:
+        """
+        """
+        # Define empty green in regulation list
+        strokes = []
+
+        for cell in cell_elements:
+            try:
+                score_div = cell.find_element(By.CSS_SELECTOR, "div.score-value")
+                html = score_div.get_attribute("innerHTML").strip()
+                main_value = html.split("<")[0].strip()
+            except Exception:
+                main_value = "N/A"  # fallback if structure is slightly different
+
+            # Handle empty values
+            if not main_value or main_value == "&nbsp;":
+                main_value = "N/A"
+
+            strokes.append(main_value)
+
+        return strokes
+
     def get_round_date(self) -> date | None:
         """
         Extracts the round date from the current round page.
@@ -442,7 +464,7 @@ class RoundData(AbstractDataCollection, SeleniumDriver, BlobClient):
                     label = raw_label.capitalize()
 
                     # Find div values
-                    cell_elements = line.find_elements(By.CSS_SELECTOR, 'div.values > div.cell')
+                    cell_elements = line.find_elements(By.CSS_SELECTOR, 'div.values > div.cell, div.values > *')
 
                     # Perform fairways hit mapping
                     if 'fairways' in label.lower():
@@ -454,19 +476,24 @@ class RoundData(AbstractDataCollection, SeleniumDriver, BlobClient):
                         scorecard_data[label] = self.parse_gir(cell_elements)
                         continue
 
-                    # Default row (Par, Score, Putts, etc.)
-                    values_elements = line.find_elements(By.CSS_SELECTOR, 'div.values > *')
-                    values = []
-                    for el in values_elements:
-                        text = el.text.strip()
-                        html = el.get_attribute('innerHTML').strip()
-                        if not text and html == '&nbsp;':
-                            values.append("N/A")
-                        else:
-                            values.append(text or "N/A")
+                    if self.vars.round_site_player_name.lower() in label.lower():
+                        scorecard_data[label] = self.parse_strokes(cell_elements)
 
-                    # Append data to dictionary object
-                    scorecard_data[label] = values
+                    if label.lower() not in ["fairways", "gir", self.vars.round_site_player_name.lower()]:
+
+                        # Default row (Par, Score, Putts, etc.)
+                        values_elements = line.find_elements(By.CSS_SELECTOR, 'div.values > *')
+                        values = []
+                        for el in values_elements:
+                            text = el.text.strip()
+                            html = el.get_attribute('innerHTML').strip()
+                            if not text and html == '&nbsp;':
+                                values.append("N/A")
+                            else:
+                                values.append(text or "N/A")
+
+                        # Append data to dictionary object
+                        scorecard_data[label] = values
 
                 # Transform scorecard data
                 transformed_scorecard_data = self.transform_scorecard_data(scorecard_data=scorecard_data)

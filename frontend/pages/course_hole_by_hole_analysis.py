@@ -1,6 +1,6 @@
 # Import dependencies
 from streamlit_components.ui_components import configure_page_config
-from frontend import render_trackman_session_analysis
+from frontend import render_course_analysis
 from shared import Variables
 import streamlit as st
 
@@ -18,5 +18,5 @@ if not st.user.is_logged_in:
 # If logged in, render page components
 if st.user.is_logged_in:
 
-    # Render trackman session analysis section
-    render_trackman_session_analysis()
+    # Render course analysis section
+    render_course_analysis(vars=Variables())
