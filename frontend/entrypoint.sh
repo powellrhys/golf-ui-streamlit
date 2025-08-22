@@ -7,7 +7,7 @@ mkdir -p /app/.streamlit
 # Create skeleton for secrets.toml file
 cat <<EOF > /app/.streamlit/secrets.toml
 [general]
-blob_connection_string = "${BLOB_CONNECTION_STRING:-}"
+blob_connection_string = "${BLOB_STORAGE_CONNECTION_STRING:-}"
 golf_course_name= "${GOLF_COURSE_NAME:-}"
 
 [auth]
