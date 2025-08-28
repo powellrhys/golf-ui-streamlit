@@ -30,7 +30,7 @@ def render_hole_metrics(vars: Variables) -> None:
                            max_value=home_rounds_count,
                            value=10)
 
-    file_name = f"{vars.golf_course_name}_golf_course_hole_summary/{hole.lower().replace(": ", "_")}.json"
+    file_name = f"{vars.golf_course_name}_golf_course_hole_summary/{hole.lower().replace(': ', '_')}.json"
 
     data = BlobClient() \
         .read_blob_to_dict(
