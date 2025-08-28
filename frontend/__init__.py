@@ -5,8 +5,8 @@ from .functions import (
     collect_club_trajectory_data,
     collect_yardage_summary_data,
     render_club_yardage_analysis,
-    render_course_analysis,
     display_club_metrics,
+    render_hole_metrics,
     extract_stat_flags,
     get_navigation
 )
@@ -17,8 +17,8 @@ __all__ = [
     "collect_club_trajectory_data",
     "collect_yardage_summary_data",
     "render_club_yardage_analysis",
-    "render_course_analysis",
     "display_club_metrics",
+    "render_hole_metrics",
     "extract_stat_flags",
     "get_navigation"
 ]

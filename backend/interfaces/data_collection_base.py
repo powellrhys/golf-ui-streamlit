@@ -13,6 +13,11 @@ class AbstractDataCollection(ABC):
         ABC: Python's Abstract Base Class, ensuring subclasses implement
         required abstract methods.
     """
+    @abstractmethod
+    def initiate_driver(self) -> None:
+        """
+        """
+        pass
 
     @abstractmethod
     def login_to_website(self) -> None:

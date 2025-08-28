@@ -19,11 +19,7 @@ class SeleniumDriver(AbstractSeleniumDriver):
         AbstractSeleniumDriver: Base class that defines the Selenium driver
         interface/contract to be implemented.
     """
-    def configure_driver(
-        self,
-        driver_path: str = 'chromedriver.exe',
-        headless: bool = False,
-    ) -> WebDriver:
+    def configure_driver(self, driver_path: str = 'chromedriver.exe', headless: bool = False) -> WebDriver:
         """
         Configures and returns a Chrome WebDriver instance.
 

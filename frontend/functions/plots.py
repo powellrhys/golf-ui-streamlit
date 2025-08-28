@@ -1,4 +1,5 @@
 # Import python packages
+from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import streamlit as st
 import pandas as pd
@@ -46,3 +47,39 @@ def plot_final_trajectory_contour(
 
     # Display in Streamlit
     st.plotly_chart(fig)
+
+def plot_fairways_hit(df: pd.DataFrame) -> go.Figure:
+    """
+    """
+    # --- Create subplot layout ---
+    fig = make_subplots(rows=1,
+                        cols=2,
+                        specs=[[{"type": "bar"}, {"type": "domain"}]])
+
+    # Define colour map
+    colour_map = ["#FF2B2B", "#3B82F6", "#2E7E00"]
+
+    # Bar chart
+    fig.add_trace(
+        go.Bar(x=df["Fairway"],
+               y=df["Count"],
+               text=df["Count"],
+               textposition="inside",
+               marker_color=colour_map,
+               showlegend=False), row=1, col=1)
+
+    # Pie chart
+    fig.add_trace(
+        go.Pie(labels=df["Fairway"],
+               values=df["Count"],
+               marker=dict(colors=colour_map),
+               hole=0.4), row=1, col=2)
+
+    # Layout
+    fig.update_layout(
+        title="Driving Accuracy Overview",
+        showlegend=True,
+        bargap=0.1
+    )
+
+    return fig

@@ -10,25 +10,36 @@ from .data_functions import (
 from shared import BlobClient, Variables
 import streamlit as st
 
-def render_course_analysis(vars: Variables) -> None:
+def render_hole_metrics(vars: Variables) -> None:
     """
     """
-    # Define page title
-    st.title(f"{vars.golf_course_name.capitalize()} GC Analysis")
-
-    columns = st.columns([1, 3])
+    columns = st.columns([1, 2, 1])
 
     with columns[0]:
         hole = st.selectbox(label="Hole",
                             options=[f"Hole: {i + 1}" for i in range(18)])
 
-    data = BlobClient().read_blob_to_dict(
-        container="golf",
-        input_filename=f"{vars.golf_course_name}_golf_course_hole_summary/{hole.lower().replace(": ", "_")}.json")
-    
-    shots = [int(stroke[vars.round_site_player_name])
+    with columns[-1]:
+
+        all_rounds = BlobClient().list_blob_filenames(container_name="golf", directory_path="scorecards")
+
+        home_rounds_count = len([round for round in all_rounds if vars.golf_course_name.lower() in round.lower()])
+
+        rounds = st.slider(label="Last N Rounds",
+                           min_value=10,
+                           max_value=home_rounds_count,
+                           value=10)
+
+    file_name = f"{vars.golf_course_name}_golf_course_hole_summary/{hole.lower().replace(": ", "_")}.json"
+
+    data = BlobClient() \
+        .read_blob_to_dict(
+            container="golf",
+            input_filename=file_name)[0:rounds]
+
+    shots = [int(stroke["Strokes"])
              for stroke in data
-             if str(stroke[vars.round_site_player_name]).isdigit()]
+             if str(stroke["Strokes"]).isdigit()]
 
     putts = [int(stroke["Putts"]) for stroke in data if str(stroke["Putts"]).isdigit()]
 
@@ -48,7 +59,8 @@ def render_course_analysis(vars: Variables) -> None:
         with columns[ind]:
             st.metric(label=label.capitalize(), value=value, border=True)
 
-    st.json(data)
+    return data
+
 
 def render_trackman_club_analysis() -> None:
     """
@@ -156,6 +168,8 @@ def render_trackman_session_analysis() -> None:
             label='Trackman Session Date',
             options=list(set([shot["Club"] for shot in data]))
         )
+
+    st.write(club)
 
 def render_club_yardage_analysis() -> None:
     """

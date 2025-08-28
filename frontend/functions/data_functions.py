@@ -2,6 +2,23 @@
 from shared import BlobClient
 import pandas as pd
 
+def aggregate_fairway_data(data):
+    """
+    """
+    # Convert data into dataframe
+    df = pd.DataFrame(data)
+
+    # Count frequencies
+    fairway_df = df["Fairways"].value_counts().reset_index()
+    fairway_df.columns = ["Fairway", "Count"]
+
+    # Force order
+    order = ["Left", "Target", "Right"]
+    fairway_df["Fairway"] = pd.Categorical(fairway_df["Fairway"], categories=order, ordered=True)
+    fairway_df = fairway_df.sort_values("Fairway")
+
+    return fairway_df
+
 
 def extract_stat_flags(metrics) -> list[bool, bool, bool]:
     """
