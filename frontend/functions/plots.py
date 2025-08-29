@@ -89,6 +89,16 @@ def plot_fairways_hit(df: pd.DataFrame) -> go.Figure:
 
 def plot_strokes_per_hole(df: pd.DataFrame):
     """
+    Plot a stacked bar chart of strokes per round.
+
+    Uses Plotly to display strokes grouped by result (e.g., Par, Birdie)
+    across rounds, with values annotated inside the bars.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing at least 'date_str', 'Strokes',
+            and 'result' columns.
+
+    Returns: None
     """
     # Define colour map for plot
     color_map = {
