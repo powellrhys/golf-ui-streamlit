@@ -17,6 +17,9 @@ app = TrackMan(logger=logger,
                headless=True,
                driver_path=vars.chromedriver_path)
 
+# Initiate driver
+app.initiate_driver()
+
 # Login to trackman site
 logger.info("Logging into golf Trackman application...")
 app.login_to_website()

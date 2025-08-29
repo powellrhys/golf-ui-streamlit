@@ -1,11 +1,8 @@
 # Import dependencies
 from streamlit_components.ui_components import configure_page_config
-from frontend import render_trackman_session_analysis
+from frontend import render_course_hole_by_hole_section
 from shared import Variables
 import streamlit as st
-
-# Collect all project variables
-variables = Variables(source="frontend")
 
 # Set page config
 configure_page_config(repository_name='golf-ui-streamlit',
@@ -18,5 +15,5 @@ if not st.user.is_logged_in:
 # If logged in, render page components
 if st.user.is_logged_in:
 
-    # Render trackman session analysis section
-    render_trackman_session_analysis()
+    # Render course hole by hole section
+    render_course_hole_by_hole_section(variables=Variables(source="frontend"))

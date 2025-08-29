@@ -2,9 +2,9 @@
 from .functions import (
     TrackManAggregator,
     configure_logging,
+    ScorecardParser,
     RoundAggregator,
     SeleniumDriver,
-    RoundData,
     TrackMan
 )
 from .interfaces import (
@@ -17,6 +17,7 @@ __all__ = [
     "AbstractSeleniumDriver",
     "TrackManAggregator",
     "configure_logging",
+    "ScorecardParser",
     "RoundAggregator",
     "SeleniumDriver",
     "RoundData",

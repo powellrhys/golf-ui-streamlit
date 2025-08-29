@@ -9,6 +9,7 @@ if str(ROOT) not in sys.path:
 
 # Import further dependencies following parent system path change
 from functions import get_navigation # noqa
+from shared import Variables # noqa
 import streamlit as st # noqa
 
 # Ensure user is authenticated to use application
@@ -17,5 +18,5 @@ if not st.user.is_logged_in:
 
 # Render application if user is logged in
 if st.user.is_logged_in:
-    pg = get_navigation()
+    pg = get_navigation(vars=Variables())
     pg.run()

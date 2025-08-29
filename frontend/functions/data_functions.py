@@ -2,6 +2,65 @@
 from shared import BlobClient
 import pandas as pd
 
+def transform_stroke_per_hole_data(data: list) -> pd.DataFrame:
+    """
+    Transform raw hole-level data into aggregated strokes per round.
+
+    Converts a list of hole data into a DataFrame, sorts by date,
+    formats dates, and groups strokes by round date and result.
+
+    Args:
+        data (list): List of dictionaries containing hole-level data
+            with keys including 'date', 'Strokes', and 'result'.
+
+    Returns:
+        pd.DataFrame: Aggregated DataFrame with total strokes per round
+        grouped by date and result.
+    """
+    # Convert data to dataframe
+    df = pd.DataFrame(data)
+
+    # Sort data by date column
+    df = df.sort_values("date", ascending=False)
+
+    # Generate string formatted date column and generate pandas categorical column
+    df["date_str"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
+    df["date_str"] = pd.Categorical(df["date_str"], categories=df["date_str"], ordered=True)
+
+    # Group data by date and result
+    strokes_df = df.groupby(["date_str", "result"], as_index=False)["Strokes"].sum()
+
+    return strokes_df
+
+def aggregate_fairway_data(data):
+    """
+    Aggregate fairway accuracy data into ordered counts.
+
+    Converts raw hole data into a DataFrame, counts fairway outcomes,
+    and enforces a Left-Target-Right categorical order.
+
+    Args:
+        data (list or pd.DataFrame): Hole-level data containing a
+            'Fairways' column.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns ['Fairway', 'Count']
+        ordered as Left, Target, Right.
+    """
+    # Convert data into dataframe
+    df = pd.DataFrame(data)
+
+    # Count frequencies
+    fairway_df = df["Fairways"].value_counts().reset_index()
+    fairway_df.columns = ["Fairway", "Count"]
+
+    # Force order
+    order = ["Left", "Target", "Right"]
+    fairway_df["Fairway"] = pd.Categorical(fairway_df["Fairway"], categories=order, ordered=True)
+    fairway_df = fairway_df.sort_values("Fairway")
+
+    return fairway_df
+
 
 def extract_stat_flags(metrics) -> list[bool, bool, bool]:
     """
