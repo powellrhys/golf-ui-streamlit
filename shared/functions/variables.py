@@ -57,14 +57,11 @@ class Variables():
         """
         Allow dictionary-style access to environment variable attributes.
 
-        Args:
-            key (str): The attribute name to retrieve.
+        Args: key (str): The attribute name to retrieve.
 
-        Returns:
-            Any: The value of the requested attribute.
+        Returns: Any: The value of the requested attribute.
 
-        Raises:
-            KeyError: If the requested key does not exist as an attribute.
+        Raises: KeyError: If the requested key does not exist as an attribute.
         """
         # If class as attributes, return items
         if hasattr(self, key):

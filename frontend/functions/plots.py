@@ -1,6 +1,7 @@
 # Import python packages
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 import pandas as pd
 
@@ -50,16 +51,22 @@ def plot_final_trajectory_contour(
 
 def plot_fairways_hit(df: pd.DataFrame) -> go.Figure:
     """
+    Plot fairways hit as bar and pie charts.
+
+    Creates a two-panel subplot: a bar chart of fairway outcomes (Left, Target, Right)
+    and a pie chart showing the distribution of those outcomes.
+
+    Args: df (pd.DataFrame): DataFrame with columns "Fairway" (str) and "Count" (int).
+
+    Returns: go.Figure: A Plotly figure containing the subplot visualization.
     """
-    # --- Create subplot layout ---
-    fig = make_subplots(rows=1,
-                        cols=2,
-                        specs=[[{"type": "bar"}, {"type": "domain"}]])
+    # Create subplot layout
+    fig = make_subplots(rows=1, cols=2, specs=[[{"type": "bar"}, {"type": "domain"}]])
 
     # Define colour map
     colour_map = ["#FF2B2B", "#3B82F6", "#2E7E00"]
 
-    # Bar chart
+    # Add Bar chart trace to subplot
     fig.add_trace(
         go.Bar(x=df["Fairway"],
                y=df["Count"],
@@ -68,18 +75,52 @@ def plot_fairways_hit(df: pd.DataFrame) -> go.Figure:
                marker_color=colour_map,
                showlegend=False), row=1, col=1)
 
-    # Pie chart
+    # Add Pie chart trace to subplot
     fig.add_trace(
         go.Pie(labels=df["Fairway"],
                values=df["Count"],
                marker=dict(colors=colour_map),
                hole=0.4), row=1, col=2)
 
-    # Layout
-    fig.update_layout(
-        title="Driving Accuracy Overview",
-        showlegend=True,
-        bargap=0.1
-    )
+    # Update figure layout
+    fig.update_layout(showlegend=True, bargap=0.1)
 
     return fig
+
+def plot_strokes_per_hole(df: pd.DataFrame):
+    """
+    """
+    # Define colour map for plot
+    color_map = {
+        "Eagle": "#ffee00",
+        "Birdie": "#2ca02c",
+        "Par": "#1f77b4",
+        "Bogey": "#ff7f0e",
+        "Double Bogey or worse": "#d62728"
+    }
+
+    fig = px.bar(
+        data_frame=df,
+        x="date_str",
+        y="Strokes",
+        text="Strokes",
+        color="result",
+        title="Strokes Per Round Overview",
+        barmode="stack",
+        category_orders={
+            "date_str": df["date_str"].unique(),
+            "result": list(color_map.keys())
+        },
+        color_discrete_map=color_map
+    )
+
+    # Place values inside the bars
+    fig.update_traces(textposition="inside")
+
+    # Explicitly treat x-axis as categorical
+    fig.update_xaxes(type="category", title="Date")
+    fig.update_layout(
+        yaxis_title="Strokes"
+    )
+
+    st.plotly_chart(fig)

@@ -1,5 +1,6 @@
 # Import dependencies
 from .functions import (
+    render_course_hole_by_hole_section,
     render_trackman_session_analysis,
     render_trackman_club_analysis,
     collect_club_trajectory_data,
@@ -12,6 +13,7 @@ from .functions import (
 )
 
 __all__ = [
+    "render_course_hole_by_hole_section",
     "render_trackman_session_analysis",
     "render_trackman_club_analysis",
     "collect_club_trajectory_data",

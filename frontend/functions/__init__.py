@@ -1,5 +1,6 @@
 # Import dependencies
 from .ui_sections import (
+    render_course_hole_by_hole_section,
     render_trackman_session_analysis,
     render_trackman_club_analysis,
     render_club_yardage_analysis,
@@ -14,6 +15,7 @@ from .ui_components import display_club_metrics
 from .navigation import get_navigation
 
 __all__ = [
+    "render_course_hole_by_hole_section",
     "render_trackman_session_analysis",
     "render_trackman_club_analysis",
     "collect_club_trajectory_data",

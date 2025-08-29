@@ -2,6 +2,24 @@
 from shared import BlobClient
 import pandas as pd
 
+def transform_stroke_per_hole_data(data: list) -> pd.DataFrame:
+    """
+    """
+    # Convert data to dataframe
+    df = pd.DataFrame(data)
+
+    # Sort data by date column
+    df = df.sort_values("date", ascending=False)
+
+    # Generate string formatted date column and generate pandas categorical column
+    df["date_str"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
+    df["date_str"] = pd.Categorical(df["date_str"], categories=df["date_str"], ordered=True)
+
+    # Group data by date and result
+    strokes_df = df.groupby(["date_str", "result"], as_index=False)["Strokes"].sum()
+
+    return strokes_df
+
 def aggregate_fairway_data(data):
     """
     """
