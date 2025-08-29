@@ -3,32 +3,37 @@ from abc import ABC, abstractmethod
 
 class AbstractDataCollection(ABC):
     """
-    Abstract base class for data collection workflows.
+    Abstract base class for data collection processes.
 
-    This class defines the interface for any data collection implementation.
-    Subclasses must implement methods for authenticating and retrieving data
-    from their respective sources (e.g., websites, APIs).
-
-    Inherits from:
-        ABC: Python's Abstract Base Class, ensuring subclasses implement
-        required abstract methods.
+    This class defines the blueprint for initializing a driver and
+    logging into a website. Subclasses must implement these methods
+    according to the specific website or driver being used.
     """
     @abstractmethod
     def initiate_driver(self) -> None:
         """
+        Initialize the web driver instance.
+
+        This method should set up and configure the web driver
+        (e.g., Selenium, Playwright, etc.) that will be used
+        to interact with the website.
+
+        Raises:
+            RuntimeError: If the driver could not be initialized.
         """
         pass
 
     @abstractmethod
     def login_to_website(self) -> None:
         """
-        Abstract method for handling website login.
+        Log in to the target website.
 
-        Subclasses must implement this method to define how authentication
-        is performed against their target website.
+        This method should handle the authentication flow required
+        to access the website. Implementation may vary depending
+        on the website's login process.
 
         Raises:
-            NotImplementedError: If called directly on the abstract class
-            without an implementation in a subclass.
+            ValueError: If login credentials are invalid.
+            ConnectionError: If the website cannot be reached.
         """
         pass

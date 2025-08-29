@@ -8,11 +8,23 @@ import re
 
 class ScorecardParser(SeleniumDriver):
     """
+    Parses golf scorecards from the Hole19 website.
+
+    Uses Selenium to extract round details, clean raw HTML data, and
+    transform it into structured hole-level records.
     """
     def __init__(self, logger: logging.Logger,
                  driver_path: str = 'chromedriver.exe',
                  headless: bool = False) -> None:
         """
+        Initialize the ScorecardParser.
+
+        Sets up logging, ChromeDriver configuration, and shared variables.
+
+        Args:
+            logger (logging.Logger): Logger instance for recording progress and errors.
+            driver_path (str, optional): Path to the ChromeDriver executable. Defaults to 'chromedriver.exe'.
+            headless (bool, optional): Whether to run Chrome in headless mode. Defaults to False.
         """
         super().__init__()
         self.driver_path = driver_path
@@ -22,11 +34,23 @@ class ScorecardParser(SeleniumDriver):
 
     def initiate_driver(self) -> None:
         """
+        Configure and start the Selenium WebDriver.
+
+        Creates a ChromeDriver instance with the given path and headless setting.
+
+        Returns: None
         """
         self.driver = self.configure_driver(driver_path=self.driver_path, headless=self.headless)
 
     def parse_fairways(self, cell_elements: list) -> list[str]:
         """
+        Parse fairway hit directions.
+
+        Extracts whether each tee shot went left, right, target, or was unavailable.
+
+        Args: cell_elements (list): List of HTML cell elements representing fairway data.
+
+        Returns: list[str]: List of fairway directions per hole.
         """
         # Define empty direction list
         directions = []
@@ -53,6 +77,13 @@ class ScorecardParser(SeleniumDriver):
 
     def parse_gir(self, cell_elements: list) -> list[bool]:
         """
+        Parse greens in regulation (GIR).
+
+        Determines whether the green was reached in regulation for each hole.
+
+        Args: cell_elements (list): List of HTML cell elements representing GIR data.
+
+        Returns: list[bool]: True if GIR, False otherwise per hole.
         """
         # Define empty green in regulation list
         gir_results = []
@@ -66,6 +97,13 @@ class ScorecardParser(SeleniumDriver):
 
     def parse_strokes(self, cell_elements: list) -> list[int | None]:
         """
+        Parse stroke counts.
+
+        Extracts the number of strokes taken per hole from scorecard cells.
+
+        Args: cell_elements (list): List of HTML cell elements representing strokes.
+
+        Returns: list[int | None]: Stroke counts per hole, or None if missing.
         """
         # Define empty green in regulation list
         strokes = []
@@ -93,6 +131,11 @@ class ScorecardParser(SeleniumDriver):
 
     def get_round_date(self) -> date | None:
         """
+        Extract the round date.
+
+        Reads the round's date from the scorecard page.
+
+        Returns: date | None: The round date, or None if not found.
         """
         # Collect scorecard date
         try:
@@ -110,6 +153,11 @@ class ScorecardParser(SeleniumDriver):
 
     def get_course_name(self) -> str | None:
         """
+        Extract the course name.
+
+        Reads the course name from the scorecard page and normalizes formatting.
+
+        Returns: str | None: Normalized course name, or None if not found.
         """
         # Find course name
         try:
@@ -127,6 +175,13 @@ class ScorecardParser(SeleniumDriver):
 
     def clean_strokes(self, scorecard_data: list) -> list:
         """
+        Clean stroke values.
+
+        Replaces invalid or missing stroke entries with numeric values or "N/A".
+
+        Args: scorecard_data (list): Scorecard data with raw strokes.
+
+        Returns: list: Cleaned scorecard data.
         """
         # Iterate through scorecard table
         for hole_data in scorecard_data:
@@ -145,6 +200,13 @@ class ScorecardParser(SeleniumDriver):
 
     def convert_player_to_stroke_key(self, scorecard: list[dict]) -> list[dict]:
         """
+        Rename player stroke key.
+
+        Moves the player's stroke values to a standardized "Strokes" field.
+
+        Args: scorecard (list[dict]): Scorecard data.
+
+        Returns: list[dict]: Updated scorecard data with "Strokes".
         """
         for hole in scorecard:
             if self.vars.round_site_player_name in hole:
@@ -152,8 +214,15 @@ class ScorecardParser(SeleniumDriver):
 
         return scorecard
 
-    def convert_value(self, val):
+    def convert_value(self, val) -> int | float | bool | None | str:
         """
+        Convert values to numeric or None.
+
+        Handles conversion to int, float, None, or keeps booleans unchanged.
+
+        Args: val: Raw scorecard value.
+
+        Returns: int | float | bool | None | str: Converted value.
         """
         # Leave booleans unchanged
         if isinstance(val, bool):
@@ -178,15 +247,29 @@ class ScorecardParser(SeleniumDriver):
 
     def drop_unplayed_holes(self, data: list[dict]) -> list[dict]:
         """
+        Remove unplayed holes.
+
+        Filters out holes with no stroke values.
+
+        Args: data (list[dict]): Scorecard data.
+
+        Returns: list[dict]: Scorecard data with only played holes.
         """
+        # Remove unplayed holes from list
         return [d for d in data if d["Strokes"] is not None]
 
     def parse_scorecard_rows(self, line, scorecard_data) -> dict:
         """
-        """
-        # Define empty scorecard dictionary object
-        # scorecard_data = {}
+        Parse a row of the scorecard.
 
+        Extracts fairways, GIR, strokes, or generic stats (par, putts, etc.).
+
+        Args: line: Selenium element representing a row of the scorecard.
+            scorecard_data (dict): Dictionary to populate with parsed data.
+
+        Returns: dict: Updated scorecard data.
+        """
+        # Read elements from html
         raw_label = line.find_element(By.CSS_SELECTOR, 'div.line-left > p, div.line-left > p.body-bold')\
             .text.strip()
         label = raw_label.capitalize()
@@ -202,9 +285,11 @@ class ScorecardParser(SeleniumDriver):
         if 'gir' in label.lower():
             scorecard_data[label] = self.parse_gir(cell_elements)
 
+        # Perform strokes taken mapping
         if self.vars.round_site_player_name.lower() in label.lower():
             scorecard_data[label] = self.parse_strokes(cell_elements)
 
+        # Handle remaining fields
         if label.lower() not in ["fairways", "gir", self.vars.round_site_player_name.lower()]:
 
             # Default row (Par, Score, Putts, etc.)
@@ -225,7 +310,13 @@ class ScorecardParser(SeleniumDriver):
 
     def transform_scorecard_data(self, scorecard_data: dict[str, list]) -> list[dict]:
         """
-        Transforms scorecard data into a list of dicts per hole.
+        Transform scorecard structure.
+
+        Converts row-based data into hole-by-hole dictionaries.
+
+        Args: scorecard_data (dict[str, list]): Raw scorecard data by stat type.
+
+        Returns: list[dict]: Structured list of holes with stats.
         """
         holes = []
         num_holes = 18
@@ -245,7 +336,13 @@ class ScorecardParser(SeleniumDriver):
 
     def annotate_results(self, scorecard: list[dict]) -> list[dict]:
         """
-        Adds a 'result' field to each hole dict based on Strokes vs Par.
+        Annotate hole results.
+
+        Adds a "result" field (e.g., Birdie, Par, Bogey) based on strokes vs par.
+
+        Args: scorecard (list[dict]): Scorecard data with strokes and par.
+
+        Returns: list[dict]: Scorecard with annotated results.
         """
         results = []
         for hole in scorecard:
@@ -258,8 +355,10 @@ class ScorecardParser(SeleniumDriver):
                 results.append(hole)
                 continue
 
+            # Work out hole result
             diff = strokes - par
 
+            # Perform mapping for result
             if diff == -3:
                 hole["result"] = "Albatross"
             elif diff == -2:
@@ -273,12 +372,21 @@ class ScorecardParser(SeleniumDriver):
             else:
                 hole["result"] = "Double Bogey or worse"
 
+            # Append data to result dictionary
             results.append(hole)
 
         return results
 
-    def collect_scorecard_data(self, url: str) -> dict:
+    def collect_scorecard_data(self, url: str) -> tuple[list[dict], str]:
         """
+        Collect and process scorecard data from a URL.
+
+        Navigates to a scorecard page, extracts rows, transforms them into hole-level data,
+        cleans values, and annotates results.
+
+        Args: url (str): The scorecard page URL.
+
+        Returns: tuple[list[dict], str]: Processed scorecard data and output file name.
         """
         # Define empty scorecard dictionary object
         scorecard_data = {}

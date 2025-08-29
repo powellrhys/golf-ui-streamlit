@@ -7,14 +7,33 @@ import logging
 
 class Hole19Scrapper:
     """
+    Orchestrates the scraping of Hole19 scorecards.
+
+    Coordinates navigation, parsing, exporting to blob storage, and
+    aggregation of round-level and hole-level data.
     """
     def __init__(self, logger: logging.Logger) -> None:
         """
+        Initialize the Hole19Scrapper.
+
+        Args: logger (logging.Logger): Logger instance for recording progress and errors.
         """
         self.logger = logger
 
     def run(self, driver_path: str, headless: bool):
         """
+        Execute the full Hole19 scraping workflow.
+
+        Logs into Hole19, collects round URLs, parses scorecards, saves data
+        to blob storage, and aggregates hole-level results.
+
+        Args:
+            driver_path (str): Path to the ChromeDriver executable.
+            headless (bool): Whether to run Chrome in headless mode.
+
+        Returns: None
+
+        Raises: BaseException: If scorecard data cannot be collected or exported.
         """
         # Initiate Hole19Navigator object
         self.navigator = Hole19Navigator(logger=self.logger, driver_path=driver_path, headless=headless)

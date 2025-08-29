@@ -1,24 +1,30 @@
 # Import dependencies
+from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, TimeoutException
 from ..interfaces.data_collection_base import AbstractDataCollection
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from .selenium_driver import SeleniumDriver
 from shared import Variables
-from selenium.common.exceptions import (
-    ElementClickInterceptedException,
-    NoSuchElementException,
-    TimeoutException
-)
 import logging
 
 class Hole19Navigator(AbstractDataCollection, SeleniumDriver):
     """
+    Automates navigation and data collection from the Hole19 website.
+
+    Uses Selenium to log in, load performance data, and extract round URLs
+    for further processing.
     """
     def __init__(self, logger: logging.Logger,
                  driver_path: str = 'chromedriver.exe',
                  headless: bool = False) -> None:
         """
+        Initialize the Hole19Navigator.
+
+        Args:
+            logger (logging.Logger): Logger instance for recording progress and errors.
+            driver_path (str, optional): Path to the ChromeDriver executable. Defaults to 'chromedriver.exe'.
+            headless (bool, optional): Whether to run Chrome in headless mode. Defaults to False.
         """
         super().__init__()
         self.driver_path = driver_path
@@ -28,11 +34,29 @@ class Hole19Navigator(AbstractDataCollection, SeleniumDriver):
 
     def initiate_driver(self) -> None:
         """
+        Configure and start the Selenium WebDriver.
+
+        Creates a ChromeDriver instance with the given path and headless setting.
+
+        Args: None
+
+        Returns: None
         """
         self.driver = self.configure_driver(driver_path=self.driver_path, headless=self.headless)
 
     def login_to_website(self) -> None:
         """
+        Log into the Hole19 website.
+
+        Opens the login page, enters stored credentials, and clicks the login button.
+
+        Args: None
+
+        Returns: None
+
+        Raises:
+            TimeoutException: If the login button cannot be clicked within the wait time.
+            NoSuchElementException: If login form fields are not found.
         """
         # Navigate the trackman report page
         self.driver.get(self.vars.round_site_base_url + "/users/sign_in")
@@ -58,12 +82,29 @@ class Hole19Navigator(AbstractDataCollection, SeleniumDriver):
 
     def navigate_to_performance_tab(self) -> None:
         """
+        Navigate to the performance rounds page.
+
+        Directs the WebDriver to the Hole19 performance rounds section.
+
+        Args: None
+
+        Returns: None
         """
         # Navigate the trackman report page
         self.driver.get(self.vars.round_site_base_url + "/performance/rounds")
 
     def load_all_hole19_rounds(self):
         """
+        Load all available rounds.
+
+        Continuously clicks the 'Load More' button until no further rounds are available.
+
+        Args: None
+
+        Returns: None
+
+        Raises:
+            ElementClickInterceptedException: If a click attempt is blocked by another element.
         """
         # Define wait component
         wait = WebDriverWait(self.driver, 10)
@@ -91,6 +132,13 @@ class Hole19Navigator(AbstractDataCollection, SeleniumDriver):
 
     def collect_round_urls(self) -> list:
         """
+        Collect all round URLs.
+
+        Extracts links from the performance rounds page and returns them as a list.
+
+        Args: None
+
+        Returns: list: A list of round URLs extracted from the page.
         """
         # Find all <p> elements with class 'course-link'
         course_link_elements = self.driver.find_elements(By.CSS_SELECTOR, "p.course-link")

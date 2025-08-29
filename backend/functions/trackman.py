@@ -39,9 +39,20 @@ class TrackMan(AbstractDataCollection, SeleniumDriver, BlobClient):
             headless (bool, optional): Whether to run the browser in headless mode. Defaults to False.
         """
         super().__init__()
-        self.driver = self.configure_driver(driver_path=driver_path, headless=headless)
+        self.driver_path = driver_path
+        self.headless = headless
         self.logger = logger
         self.vars = Variables()
+
+    def initiate_driver(self) -> None:
+        """
+        Configure and start the Selenium WebDriver.
+
+        Creates a ChromeDriver instance with the given path and headless setting.
+
+        Returns: None
+        """
+        self.driver = self.configure_driver(driver_path=self.driver_path, headless=self.headless)
 
     def login_to_website(self) -> None:
         """

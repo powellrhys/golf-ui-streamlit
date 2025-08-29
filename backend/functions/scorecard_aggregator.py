@@ -1,15 +1,26 @@
 # Import dependencies
 from shared import Variables, BlobClient
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
 import logging
 import re
 
 class RoundAggregator(BlobClient):
     """
+    Aggregates golf round data from blob storage by hole number and organizes it
+    into structured JSON files for easier analysis.
+
+    This class extends the `BlobClient` to interact with Azure Blob Storage,
+    reading scorecard files, extracting hole-level information, and exporting
+    aggregated summaries for each hole. Data is sorted chronologically (most
+    recent first) to support time-series analysis of golf performance.
     """
     def __init__(self, logger: logging.Logger):
         """
+        Initialize the RoundAggregator with logging and variable configurations.
+
+        Args:
+            logger (logging.Logger): Logger instance for recording aggregation progress and errors.
         """
         super().__init__()
         self.logger = logger
@@ -17,13 +28,20 @@ class RoundAggregator(BlobClient):
 
     def aggregate_holes_by_course(self) -> None:
         """
-        """
-        # Define blob directory name
-        directory_path = "scorecards"
+        Aggregate hole-level data across scorecards for the configured golf course.
 
+        Reads scorecard JSON files from blob storage, groups hole data by hole number,
+        sorts them by date, and writes aggregated summaries back to storage.
+
+        Args: None
+
+        Returns: None
+
+        Raises: Exception: If a scorecard file cannot be read from blob storage.
+        """
         # Define hole data map and iterate through each file in blob container
         hole_data_map = defaultdict(list)
-        for filename in self.list_blob_filenames(container_name="golf", directory_path=directory_path):
+        for filename in self.list_blob_filenames(container_name="golf", directory_path="scorecards"):
 
             # Make sure container file is a json file and has the course of interest in the name
             if filename.lower().endswith(".json") and self.vars.golf_course_name.lower() in filename.lower():
