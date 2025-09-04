@@ -38,21 +38,14 @@ jobs:
           code_directory: '.'
 
   # Run PyTests
-  pytest-testing:
+  pytesting:
     name: Run PyTests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run PyTests
-        uses: powellrhys/powellrhys-iac/.github/actions/pytest-testing@feature/pytest_action
-        with:
-          testing_directory: '.'
-          toml_dependencies: '.[frontend,backend,testing]'
-        # env:
-        #   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-pytests.yml@feature/pytest_action
+    secrets:
+      codecov_token: ${{ secrets.codecov_token }}
+    with:
+      testing_directory: '.'
+      toml_dependencies: '.[frontend,backend,testing]'
 
   # # Build & Push Application
   # build-application:
