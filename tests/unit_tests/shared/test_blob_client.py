@@ -2,11 +2,24 @@ import pytest
 from unittest.mock import patch, MagicMock
 from shared import BlobClient  # adjust import
 import json
+import streamlit as st
 from azure.core.exceptions import ResourceNotFoundError
 
 # ------------------------------
 # Fixtures
 # ------------------------------
+
+@pytest.fixture(autouse=True)
+def mock_streamlit_secrets(monkeypatch):
+    """Replace st.secrets with a fake dict for all tests."""
+    fake_secrets = {
+        "general": {
+            "blob_storage_connection_string": "fake-connection-string",
+            "golf_course_name": "Fake Course",
+            "round_site_player_name": "Fake Player"
+        }
+    }
+    monkeypatch.setattr(st, "secrets", fake_secrets)
 
 @pytest.fixture
 def blob_client():
