@@ -38,7 +38,7 @@ jobs:
           code_directory: '.'
 
   # Run PyTests
-  lint-python:
+  pytest-testing:
     name: Run PyTests
     runs-on: ubuntu-latest
     steps:
