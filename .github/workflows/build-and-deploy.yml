@@ -13,14 +13,14 @@ jobs:
   # Lint yaml codebase
   lint-yaml:
     name: Lint Yaml Pipelines
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-yaml.yml@feature/template_refactor
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-yaml.yml@v1.0.0
     with:
       config_path: '.yamllint.yml'
 
   # Lint python codebase
   lint-python:
     name: Lint Python Codebase
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-python.yml@feature/template_refactor
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-python.yml@v1.0.0
     with:
       config_path: '.flake8'
       code_directory: '.'
@@ -28,7 +28,7 @@ jobs:
   # Run PyTests
   pytesting:
     name: Run PyTests
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-pytests.yml@feature/template_refactor
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-pytests.yml@v1.0.0
     secrets:
       codecov_token: ${{ secrets.codecov_token }}
     with:
@@ -37,7 +37,7 @@ jobs:
   # Run BDD Tests
   bdd:
     name: Run BDD Tests
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-bdd-tests.yml@feature/template_refactor
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-bdd-tests.yml@v1.0.0
     with:
       features_path: ./tests/features/
       toml_dependencies: '.[frontend,backend,testing]'
@@ -83,7 +83,7 @@ jobs:
   restart-appservice:
     needs: ['apply']
     name: Restart App Service
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-restart-appservice.yml@feature/template_refactor
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-restart-appservice.yml@v1.0.0
     with:
       webapp_name: golf-streamlit-frontend
       resource_group: powellrhys-app-service-plan-rg
