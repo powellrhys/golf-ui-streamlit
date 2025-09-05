@@ -34,50 +34,50 @@ jobs:
     with:
       toml_dependencies: '.[frontend,backend,testing]'
 
-  # Build & Push Application
-  build-application:
-    name: Build Application
-    needs: ['lint-yaml', 'lint-python', 'pytesting']
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-build-and-push-container.yml@main
-    secrets:
-      docker_password: ${{ secrets.docker_password }}
-    with:
-      image_name: golf-streamlit-frontend
-      docker_file_path: frontend/Dockerfile
+  # # Build & Push Application
+  # build-application:
+  #   name: Build Application
+  #   needs: ['lint-yaml', 'lint-python', 'pytesting']
+  #   uses: powellrhys/powellrhys-iac/.github/workflows/template-build-and-push-container.yml@main
+  #   secrets:
+  #     docker_password: ${{ secrets.docker_password }}
+  #   with:
+  #     image_name: golf-streamlit-frontend
+  #     docker_file_path: frontend/Dockerfile
 
-  # Execute Plan
-  plan:
-    name: Plan
-    needs: ['build-application']
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@main
-    with:
-      tf_directory: 'infra'
-      tf_vars_file_name: 'values.tfvars'
-    secrets:
-      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      app_service_app_settings: ${{ secrets.app_service_app_settings }}
+  # # Execute Plan
+  # plan:
+  #   name: Plan
+  #   needs: ['build-application']
+  #   uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@main
+  #   with:
+  #     tf_directory: 'infra'
+  #     tf_vars_file_name: 'values.tfvars'
+  #   secrets:
+  #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  #     app_service_app_settings: ${{ secrets.app_service_app_settings }}
 
-  # Execute apply
-  apply:
-    needs: ['plan']
-    name: Apply
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@main
-    with:
-      should_apply: 'true'
-      release_environment: 'PROD'
-      tf_directory: 'infra'
-      tf_vars_file_name: 'values.tfvars'
-    secrets:
-      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      app_service_app_settings: ${{ secrets.app_service_app_settings }}
+  # # Execute apply
+  # apply:
+  #   needs: ['plan']
+  #   name: Apply
+  #   uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@main
+  #   with:
+  #     should_apply: 'true'
+  #     release_environment: 'PROD'
+  #     tf_directory: 'infra'
+  #     tf_vars_file_name: 'values.tfvars'
+  #   secrets:
+  #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  #     app_service_app_settings: ${{ secrets.app_service_app_settings }}
 
-  # Restart App Service
-  restart-appservice:
-    needs: ['apply']
-    name: Restart App Service
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-restart-appservice.yml@feature/template_refactor
-    with:
-      webapp_name: golf-streamlit-frontend
-      resource_group: powellrhys-app-service-plan-rg
-    secrets:
-      azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  # # Restart App Service
+  # restart-appservice:
+  #   needs: ['apply']
+  #   name: Restart App Service
+  #   uses: powellrhys/powellrhys-iac/.github/workflows/template-restart-appservice.yml@feature/template_refactor
+  #   with:
+  #     webapp_name: golf-streamlit-frontend
+  #     resource_group: powellrhys-app-service-plan-rg
+  #   secrets:
+  #     azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
