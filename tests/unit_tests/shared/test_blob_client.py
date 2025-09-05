@@ -1,17 +1,20 @@
-import pytest
-from unittest.mock import patch, MagicMock
-from shared import BlobClient  # adjust import
-import json
-import streamlit as st
+# Import dependencies
 from azure.core.exceptions import ResourceNotFoundError
-
-# ------------------------------
-# Fixtures
-# ------------------------------
+from unittest.mock import patch, MagicMock
+from shared import BlobClient
+import streamlit as st
+import pytest
+import json
 
 @pytest.fixture(autouse=True)
 def mock_streamlit_secrets(monkeypatch):
-    """Replace st.secrets with a fake dict for all tests."""
+    """
+    Replace st.secrets with a fake dictionary.
+
+    This ensures that tests run with controlled
+    configuration values instead of real secrets.
+    """
+    # Fake secrets to mimic Streamlit config
     fake_secrets = {
         "general": {
             "blob_storage_connection_string": "fake-connection-string",
@@ -19,102 +22,183 @@ def mock_streamlit_secrets(monkeypatch):
             "round_site_player_name": "Fake Player"
         }
     }
+    # Patch Streamlit secrets with the fake dictionary
     monkeypatch.setattr(st, "secrets", fake_secrets)
+
 
 @pytest.fixture
 def blob_client():
+    """
+    Provide a BlobClient instance for testing.
+
+    Uses a test source identifier to avoid
+    side effects during execution.
+    """
     return BlobClient(source="test")
 
+class TestBlobClient:
+    """
+    Test suite for BlobClient functionality.
 
-# ------------------------------
-# list_blob_filenames tests
-# ------------------------------
+    Covers listing blobs, exporting data, and
+    reading data back from blob storage.
+    """
 
-@patch("shared.functions.blob_client.BlobServiceClient")
-def test_list_blob_filenames_no_prefix(mock_blob_service_client, blob_client):
-    mock_container_client = MagicMock()
+    @patch("shared.functions.blob_client.BlobServiceClient")
+    def test_list_blob_filenames_no_prefix(self, mock_blob_service_client, blob_client):
+        """
+        Verify blob listing without a prefix.
 
-    # Correctly mock blobs with .name attribute
-    mock_blob1 = MagicMock()
-    mock_blob1.name = "file1.txt"
-    mock_blob2 = MagicMock()
-    mock_blob2.name = "file2.txt"
+        Ensures that all blob filenames are returned
+        when no directory path is specified.
+        """
+        # Mock the container client returned by BlobServiceClient
+        mock_container_client = MagicMock()
 
-    mock_container_client.list_blobs.return_value = [mock_blob1, mock_blob2]
-    mock_blob_service_client \
-        .from_connection_string.return_value.get_container_client.return_value = mock_container_client
+        # Create fake blob objects with a .name attribute
+        mock_blob1 = MagicMock()
+        mock_blob1.name = "file1.txt"
+        mock_blob2 = MagicMock()
+        mock_blob2.name = "file2.txt"
 
-    result = blob_client.list_blob_filenames(container_name="test-container")
-    assert result == ["file1.txt", "file2.txt"]
-    mock_container_client.list_blobs.assert_called_once_with(name_starts_with="")
+        # Configure list_blobs to return the fake blobs
+        mock_container_client.list_blobs.return_value = [mock_blob1, mock_blob2]
 
-@patch("shared.functions.blob_client.BlobServiceClient")
-def test_list_blob_filenames_with_prefix(mock_blob_service_client, blob_client):
-    mock_container_client = MagicMock()
+        # Patch the connection string to return the mocked container client
+        mock_blob_service_client \
+            .from_connection_string.return_value.get_container_client.return_value = mock_container_client
 
-    mock_blob = MagicMock()
-    mock_blob.name = "folder/file1.txt"
+        # Call the function under test
+        result = blob_client.list_blob_filenames(container_name="test-container")
 
-    mock_container_client.list_blobs.return_value = [mock_blob]
-    mock_blob_service_client \
-        .from_connection_string.return_value.get_container_client.return_value = mock_container_client
+        # Verify results match expected filenames
+        assert result == ["file1.txt", "file2.txt"]
 
-    result = blob_client.list_blob_filenames(container_name="test-container", directory_path="folder/")
-    assert result == ["folder/file1.txt"]
-    mock_container_client.list_blobs.assert_called_once_with(name_starts_with="folder/")
+        # Ensure list_blobs was called with the correct prefix
+        mock_container_client.list_blobs.assert_called_once_with(name_starts_with="")
 
-# ------------------------------
-# export_dict_to_blob tests
-# ------------------------------
+    @patch("shared.functions.blob_client.BlobServiceClient")
+    def test_list_blob_filenames_with_prefix(self, mock_blob_service_client, blob_client):
+        """
+        Verify blob listing with a prefix.
 
-@patch("shared.functions.blob_client.BlobServiceClient")
-def test_export_dict_to_blob(mock_blob_service_client, blob_client):
-    mock_blob_client = MagicMock()
-    mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
+        Ensures only blobs under the given folder
+        path are included in the results.
+        """
+        # Mock the container client
+        mock_container_client = MagicMock()
 
-    data = [{"key": "value"}]
-    blob_client.export_dict_to_blob(data, container="test-container", output_filename="output.json")
+        # Create fake blob under a folder
+        mock_blob = MagicMock()
+        mock_blob.name = "folder/file1.txt"
 
-    # Validate upload_blob was called with serialized JSON
-    mock_blob_client.upload_blob.assert_called_once_with(json.dumps(data), overwrite=True)
+        # Configure list_blobs to return the fake blob
+        mock_container_client.list_blobs.return_value = [mock_blob]
 
-@patch("shared.functions.blob_client.BlobServiceClient")
-def test_export_dict_to_blob_invalid_data(mock_blob_service_client, blob_client):
-    mock_blob_client = MagicMock()
-    mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
+        # Patch to return mocked container client
+        mock_blob_service_client \
+            .from_connection_string.return_value.get_container_client.return_value = mock_container_client
 
-    data = {("invalid", "set")}  # set is not JSON serializable
-    with pytest.raises(TypeError):
+        # Call the function under test
+        result = blob_client.list_blob_filenames(
+            container_name="test-container", directory_path="folder/"
+        )
+
+        # Verify only the prefixed blob is returned
+        assert result == ["folder/file1.txt"]
+
+        # Ensure list_blobs was called with correct prefix
+        mock_container_client.list_blobs.assert_called_once_with(name_starts_with="folder/")
+
+    @patch("shared.functions.blob_client.BlobServiceClient")
+    def test_export_dict_to_blob(self, mock_blob_service_client, blob_client):
+        """
+        Verify exporting valid data to blob storage.
+
+        Ensures JSON-serializable input is converted
+        and uploaded correctly to the container.
+        """
+        # Mock the blob client for upload
+        mock_blob_client = MagicMock()
+        mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
+
+        # Sample JSON-serializable data
+        data = [{"key": "value"}]
+
+        # Call the function under test
         blob_client.export_dict_to_blob(data, container="test-container", output_filename="output.json")
 
+        # Verify that upload_blob was called with correct JSON
+        mock_blob_client.upload_blob.assert_called_once_with(json.dumps(data), overwrite=True)
 
-# ------------------------------
-# read_blob_to_dict tests
-# ------------------------------
+    @patch("shared.functions.blob_client.BlobServiceClient")
+    def test_export_dict_to_blob_invalid_data(self, mock_blob_service_client, blob_client):
+        """
+        Verify error handling for invalid export data.
 
-@patch("shared.functions.blob_client.BlobServiceClient")
-def test_read_blob_to_dict_valid_json(mock_blob_service_client, blob_client):
-    mock_blob_client = MagicMock()
-    mock_blob_client.download_blob.return_value.readall.return_value = b'[{"key": "value"}]'
-    mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
+        Ensures that non-serializable types raise
+        a TypeError during JSON conversion.
+        """
+        # Mock the blob client
+        mock_blob_client = MagicMock()
+        mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
 
-    result = blob_client.read_blob_to_dict(container="test-container", input_filename="input.json")
-    assert result == [{"key": "value"}]
+        # Use invalid data (set is not JSON serializable)
+        data = {("invalid", "set")}
 
-@patch("shared.functions.blob_client.BlobServiceClient")
-def test_read_blob_to_dict_invalid_json(mock_blob_service_client, blob_client):
-    mock_blob_client = MagicMock()
-    mock_blob_client.download_blob.return_value.readall.return_value = b'invalid json'
-    mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
+        # Expect a TypeError when trying to export
+        with pytest.raises(TypeError):
+            blob_client.export_dict_to_blob(data, container="test-container", output_filename="output.json")
 
-    with pytest.raises(json.JSONDecodeError):
-        blob_client.read_blob_to_dict(container="test-container", input_filename="input.json")
+    @patch("shared.functions.blob_client.BlobServiceClient")
+    def test_read_blob_to_dict_valid_json(self, mock_blob_service_client, blob_client):
+        """
+        Verify reading and parsing valid JSON data.
 
-@patch("shared.functions.blob_client.BlobServiceClient")
-def test_read_blob_to_dict_blob_not_found(mock_blob_service_client, blob_client):
-    mock_blob_client = MagicMock()
-    mock_blob_client.download_blob.side_effect = ResourceNotFoundError("Blob not found")
-    mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
+        Ensures blob contents are deserialized
+        into Python objects successfully.
+        """
+        # Mock the blob client to return JSON bytes
+        mock_blob_client = MagicMock()
+        mock_blob_client.download_blob.return_value.readall.return_value = b'[{"key": "value"}]'
+        mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
 
-    with pytest.raises(ResourceNotFoundError):
-        blob_client.read_blob_to_dict(container="test-container", input_filename="missing.json")
+        # Call the function under test
+        result = blob_client.read_blob_to_dict(container="test-container", input_filename="input.json")
+
+        # Verify JSON is parsed correctly
+        assert result == [{"key": "value"}]
+
+    @patch("shared.functions.blob_client.BlobServiceClient")
+    def test_read_blob_to_dict_invalid_json(self, mock_blob_service_client, blob_client):
+        """
+        Verify error handling for invalid JSON.
+
+        Ensures malformed content raises
+        a JSONDecodeError exception.
+        """
+        # Mock the blob client to return invalid JSON
+        mock_blob_client = MagicMock()
+        mock_blob_client.download_blob.return_value.readall.return_value = b'invalid json'
+        mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
+
+        # Expect a JSONDecodeError when parsing invalid data
+        with pytest.raises(json.JSONDecodeError):
+            blob_client.read_blob_to_dict(container="test-container", input_filename="input.json")
+
+    @patch("shared.functions.blob_client.BlobServiceClient")
+    def test_read_blob_to_dict_blob_not_found(self, mock_blob_service_client, blob_client):
+        """
+        Verify error handling for missing blobs.
+
+        Ensures that attempting to read a non-existent
+        blob raises a ResourceNotFoundError.
+        """
+        # Mock the blob client to raise ResourceNotFoundError
+        mock_blob_client = MagicMock()
+        mock_blob_client.download_blob.side_effect = ResourceNotFoundError("Blob not found")
+        mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
+
+        # Expect ResourceNotFoundError when blob is missing
+        with pytest.raises(ResourceNotFoundError):
+            blob_client.read_blob_to_dict(container="test-container", input_filename="missing.json")
