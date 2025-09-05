@@ -34,10 +34,18 @@ jobs:
     with:
       toml_dependencies: '.[frontend,backend,testing]'
 
+  # Run BDD Tests
+  bdd:
+    name: Run BDD Tests
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-bdd-tests.yml@feature/template_refactor
+    with:
+      features_path: ./tests/features/
+      toml_dependencies: '.[frontend,backend,testing]'
+
   # # Build & Push Application
   # build-application:
   #   name: Build Application
-  #   needs: ['lint-yaml', 'lint-python', 'pytesting']
+  #   needs: ['lint-yaml', 'lint-python', 'pytesting', 'bdd']
   #   uses: powellrhys/powellrhys-iac/.github/workflows/template-build-and-push-container.yml@main
   #   secrets:
   #     docker_password: ${{ secrets.docker_password }}
