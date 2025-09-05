@@ -13,34 +13,39 @@ jobs:
   # Lint yaml codebase
   lint-yaml:
     name: Lint Yaml Pipelines
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Lint YAML
-        uses: powellrhys/powellrhys-iac/.github/actions/lint-yaml@main
-        with:
-          config_path: '.yamllint.yml'
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-yaml.yml@v1.0.0
+    with:
+      config_path: '.yamllint.yml'
 
   # Lint python codebase
   lint-python:
     name: Lint Python Codebase
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-python.yml@v1.0.0
+    with:
+      config_path: '.flake8'
+      code_directory: '.'
 
-      - name: Lint Python
-        uses: powellrhys/powellrhys-iac/.github/actions/lint-python@main
-        with:
-          config_path: '.flake8'
-          code_directory: '.'
+  # Run PyTests
+  pytesting:
+    name: Run PyTests
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-pytests.yml@v1.0.0
+    secrets:
+      codecov_token: ${{ secrets.codecov_token }}
+    with:
+      toml_dependencies: '.[frontend,backend,testing]'
+
+  # Run BDD Tests
+  bdd:
+    name: Run BDD Tests
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-bdd-tests.yml@v1.0.0
+    with:
+      features_path: ./tests/features/
+      toml_dependencies: '.[frontend,backend,testing]'
 
   # Build & Push Application
   build-application:
     name: Build Application
-    needs: ['lint-yaml', 'lint-python']
+    needs: ['lint-yaml', 'lint-python', 'pytesting', 'bdd']
     uses: powellrhys/powellrhys-iac/.github/workflows/template-build-and-push-container.yml@main
     secrets:
       docker_password: ${{ secrets.docker_password }}
@@ -78,14 +83,9 @@ jobs:
   restart-appservice:
     needs: ['apply']
     name: Restart App Service
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Restart App
-        uses: powellrhys/powellrhys-iac/.github/actions/restart-appservice@main
-        with:
-          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          webapp_name: golf-streamlit-frontend
-          resource_group: powellrhys-app-service-plan-rg
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-restart-appservice.yml@v1.0.0
+    with:
+      webapp_name: golf-streamlit-frontend
+      resource_group: powellrhys-app-service-plan-rg
+    secrets:
+      azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}

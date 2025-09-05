@@ -61,7 +61,6 @@ def aggregate_fairway_data(data):
 
     return fairway_df
 
-
 def extract_stat_flags(metrics) -> list[bool, bool, bool]:
     """
     Determine whether minimum, maximum, and average statistics are present
