@@ -1,6 +1,6 @@
 @frontend
 Feature: Extract statistic flags from metrics
-    As a data analyst
+    As a golf analyst
     I want to know if minimum, maximum, and average statistics are present
     So that I can handle metrics correctly
 
