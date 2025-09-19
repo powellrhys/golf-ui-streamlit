@@ -38,7 +38,8 @@ def render_hole_metrics(vars: Variables) -> list[dict]:
     with columns[-1]:
 
         # Read all round data from blob storage
-        all_rounds = BlobClient().list_blob_filenames(container_name="golf", directory_path="scorecards")
+        all_rounds = BlobClient(source="frontend") \
+            .list_blob_filenames(container_name="golf", directory_path="scorecards")
 
         # Determine how many round have been played
         home_rounds_count = len([round for round in all_rounds if vars.golf_course_name.lower() in round.lower()])
