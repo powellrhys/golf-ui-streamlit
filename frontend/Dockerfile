@@ -19,8 +19,8 @@ COPY frontend/entrypoint.sh /app/entrypoint.sh
 # Enable script execution within container
 RUN chmod +x /app/entrypoint.sh
 
-# Install project requirements
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install project dependencies from pyproject.toml
+RUN pip install --upgrade pip && pip install ".[frontend]"
 
 # Define application ports
 ENV PORT=8501
