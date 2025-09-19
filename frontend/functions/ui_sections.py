@@ -100,7 +100,7 @@ def render_course_hole_by_hole_section(variables: Variables) -> None:
     st.title(f"{variables.golf_course_name.capitalize()} GC Analysis")
 
     # Render hole metrics section
-    data = render_hole_metrics(vars=Variables())
+    data = render_hole_metrics(vars=variables)
 
     # If hole is not a par 3, render a fairways hit section
     if data[0]["Par"] != 3:
