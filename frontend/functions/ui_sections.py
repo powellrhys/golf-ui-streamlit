@@ -54,7 +54,7 @@ def render_hole_metrics(vars: Variables) -> list[dict]:
     file_name = f"{vars.golf_course_name}_golf_course_hole_summary/{hole.lower().replace(': ', '_')}.json"
 
     # Read data from blob
-    data = BlobClient().read_blob_to_dict(container="golf", input_filename=file_name)[0:rounds]
+    data = BlobClient(source="frontend").read_blob_to_dict(container="golf", input_filename=file_name)[0:rounds]
 
     # Collect number of shots per round
     shots = [int(stroke["Strokes"]) for stroke in data if str(stroke["Strokes"]).isdigit()]
