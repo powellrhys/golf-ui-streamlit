@@ -19,13 +19,13 @@ def get_navigation(vars: Variables) -> st.navigation:
     pages = {
         "Overview": [st.Page("pages/home.py", title="Home")],
         "Trackman": [
-            st.Page("pages/trackman_club_analysis.py", title="Club Analysis"),
-            st.Page("pages/trackman_session_analysis.py", title="Session Analysis"),
-            st.Page("pages/trackman_yardages.py", title="Yardages Analysis")
+            st.Page("pages/trackman_club_analysis.py", title="Club Analysis", icon="📈"),
+            st.Page("pages/trackman_session_analysis.py", title="Session Analysis", icon="📊"),
+            st.Page("pages/trackman_yardages.py", title="Yardages Analysis", icon="📃")
         ],
         f"{vars.golf_course_name.capitalize()} Golf Course Analysis": [
             st.Page(page="pages/course_hole_by_hole_analysis.py",
-                    title="Hole by Hole Analysis")]
+                    title="Hole by Hole Analysis", icon="🏌")]
     }
 
     # Construct streamlit navigation object

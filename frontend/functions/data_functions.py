@@ -89,8 +89,8 @@ def extract_stat_flags(metrics) -> list[bool, bool, bool]:
     return min_stats, max_stats, avg_stats
 
 def collect_club_trajectory_data(
-    club: str,
-    total_shots: int
+    data: list,
+    total_shots: int = 200
 ) -> tuple[pd.DataFrame, pd.DataFrame, list, list, list]:
     """
     Collects and processes trajectory data for a specified golf club.
@@ -99,8 +99,8 @@ def collect_club_trajectory_data(
     extracts relevant trajectory and performance metrics for a specified number of shots.
 
     Args:
-        club (str): The name of the club for which trajectory data is collected.
-        total_shots (int): The number of shots to process from the dataset.
+        data (list): A list of shot data.
+        total_shots (int = 200): The number of shots to process from the dataset.
 
     Returns:
         tuple: A tuple containing:
@@ -117,9 +117,6 @@ def collect_club_trajectory_data(
 
     The trajectory data is stored in Pandas DataFrames, and other metrics are returned as lists.
     """
-    data = BlobClient(source="frontend") \
-        .read_blob_to_dict(container="golf", input_filename=f"trackman_club_summary/{club}.json")
-
     # Define empty stat arrays
     all_data = []
     end_data = []
