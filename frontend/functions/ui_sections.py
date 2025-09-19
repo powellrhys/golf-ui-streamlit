@@ -1,11 +1,10 @@
 # Import dependencies
-from .plots import plot_final_trajectory_contour, plot_strokes_per_hole, plot_fairways_hit
+from .ui_components import display_club_summary_shot_trajectories
 from streamlit_components.plot_functions import PlotlyPlotter
-from .ui_components import display_club_metrics
+from .plots import plot_strokes_per_hole, plot_fairways_hit
 from .data_functions import (
     transform_stroke_per_hole_data,
     collect_yardage_summary_data,
-    collect_club_trajectory_data,
     aggregate_fairway_data,
     extract_stat_flags
 )
@@ -168,36 +167,12 @@ def render_trackman_club_analysis() -> None:
     with columns[-1]:
         total_shots = st.slider(label="Most recent shots:", min_value=0, max_value=30, value=10)
 
-    # Collect page data
-    final_flight_df, final_end_df, carry_data, total_distance, ball_speeds = \
-        collect_club_trajectory_data(
-            club=club,
-            total_shots=total_shots
-        )
+    # Read data from blob storage
+    data = BlobClient(source="frontend") \
+        .read_blob_to_dict(container="golf", input_filename=f"trackman_club_summary/{club}.json")
 
-    # Render club metric boxes
-    display_club_metrics(total_shots=total_shots,
-                         carry_data=carry_data,
-                         total_distance=total_distance,
-                         ball_speeds=ball_speeds)
-
-    # Define shot trajectory expander
-    with st.expander(label='Shot Trajectory', expanded=True):
-
-        # Plot trajectory data
-        st.plotly_chart(PlotlyPlotter(
-            df=final_flight_df,
-            x='x',
-            y='y',
-            color='Shot',
-            labels={'x': 'Horizontal Distance (m)',
-                    'y': 'Vertical Distance (m)'}).plot_line())
-
-    # Define shot distribution expander
-    with st.expander(label='Shot Distribution', expanded=True):
-
-        # Generate plotly go contour plot
-        plot_final_trajectory_contour(df=final_end_df)
+    # Render plots and summary metrics
+    display_club_summary_shot_trajectories(data=data, total_shots=total_shots)
 
 def render_trackman_session_analysis() -> None:
     """
@@ -214,7 +189,7 @@ def render_trackman_session_analysis() -> None:
     st.title('Trackman Session Analysis')
 
     # Define columns object
-    columns = st.columns([2, 2, 1])
+    columns = st.columns([2, 2, 2])
 
     # Collect a list of clubs used on the trackman range
     blob_files = BlobClient(source="frontend") \
@@ -240,11 +215,14 @@ def render_trackman_session_analysis() -> None:
     # Render club select box within second column
     with columns[1]:
         club = st.selectbox(
-            label='Trackman Session Date',
+            label='Club',
             options=list(set([shot["Club"] for shot in data]))
         )
 
-    st.write(club)
+    club_data = [shot["Strokes"] for shot in data if shot["Club"] == club][0]
+
+    # Render plots and summary metrics
+    display_club_summary_shot_trajectories(data=club_data)
 
 def render_club_yardage_analysis() -> None:
     """

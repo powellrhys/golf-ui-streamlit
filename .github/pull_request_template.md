@@ -1,17 +1,15 @@
-## Summary
+### Summary
 <!-- Briefly describe the purpose of this PR -->
 
-## Changes
+#### Changes
 <!-- List the key changes in this PR -->
-- 
 
-## Testing
+#### Testing
 <!-- How did you test your changes? -->
-- 
 
-## Notes
+#### Notes
 <!-- Anything else reviewers should know? -->
 
-## Checklist
+#### Checklist
 - [ ] Updated README (if required)
 - [ ] All pipelines succeeded

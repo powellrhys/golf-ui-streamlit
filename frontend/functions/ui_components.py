@@ -1,4 +1,7 @@
 # Import dependencies
+from streamlit_components.plot_functions import PlotlyPlotter
+from .data_functions import collect_club_trajectory_data
+from .plots import plot_final_trajectory_contour
 import streamlit as st
 
 def display_club_metrics(
@@ -45,3 +48,50 @@ def display_club_metrics(
         st.metric(label=f'Avg Ball Speed  (Last {total_shots} shots)',
                   value=f'{round(sum(ball_speeds)/len(ball_speeds), 2)}mph',
                   border=True)
+
+def display_club_summary_shot_trajectories(data: list, total_shots: int | None = None) -> None:
+    """
+    Displays a summary of golf shot trajectories for a club using Streamlit.
+
+    This function processes shot data to compute key metrics (carry distance,
+    total distance, ball speeds) and renders interactive visualizations
+    including shot trajectories and shot distribution plots.
+
+    Args:
+        data (list): A list of shot data records.
+        total_shots (int | None, optional): The number of shots to include
+            Defaults to the length of `data` if not provided.
+
+    Returns: None
+    """
+    # Handle total shot logic
+    if not total_shots:
+        total_shots = len(data)
+
+    # Collect page data
+    final_flight_df, final_end_df, carry_data, total_distance, ball_speeds = \
+        collect_club_trajectory_data(data=data, total_shots=total_shots)
+
+    # Render club metric boxes
+    display_club_metrics(total_shots=total_shots,
+                         carry_data=carry_data,
+                         total_distance=total_distance,
+                         ball_speeds=ball_speeds)
+
+    # Define shot trajectory expander
+    with st.expander(label='Shot Trajectory', expanded=True):
+
+        # Plot trajectory data
+        st.plotly_chart(PlotlyPlotter(
+            df=final_flight_df,
+            x='x',
+            y='y',
+            color='Shot',
+            labels={'x': 'Horizontal Distance (m)',
+                    'y': 'Vertical Distance (m)'}).plot_line())
+
+    # Define shot distribution expander
+    with st.expander(label='Shot Distribution', expanded=True):
+
+        # Generate plotly go contour plot
+        plot_final_trajectory_contour(df=final_end_df)
