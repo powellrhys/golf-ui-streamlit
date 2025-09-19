@@ -38,7 +38,8 @@ def render_hole_metrics(vars: Variables) -> list[dict]:
     with columns[-1]:
 
         # Read all round data from blob storage
-        all_rounds = BlobClient().list_blob_filenames(container_name="golf", directory_path="scorecards")
+        all_rounds = BlobClient(source="frontend") \
+            .list_blob_filenames(container_name="golf", directory_path="scorecards")
 
         # Determine how many round have been played
         home_rounds_count = len([round for round in all_rounds if vars.golf_course_name.lower() in round.lower()])
@@ -53,7 +54,7 @@ def render_hole_metrics(vars: Variables) -> list[dict]:
     file_name = f"{vars.golf_course_name}_golf_course_hole_summary/{hole.lower().replace(': ', '_')}.json"
 
     # Read data from blob
-    data = BlobClient().read_blob_to_dict(container="golf", input_filename=file_name)[0:rounds]
+    data = BlobClient(source="frontend").read_blob_to_dict(container="golf", input_filename=file_name)[0:rounds]
 
     # Collect number of shots per round
     shots = [int(stroke["Strokes"]) for stroke in data if str(stroke["Strokes"]).isdigit()]
@@ -100,7 +101,7 @@ def render_course_hole_by_hole_section(variables: Variables) -> None:
     st.title(f"{variables.golf_course_name.capitalize()} GC Analysis")
 
     # Render hole metrics section
-    data = render_hole_metrics(vars=Variables())
+    data = render_hole_metrics(vars=variables)
 
     # If hole is not a par 3, render a fairways hit section
     if data[0]["Par"] != 3:
@@ -108,22 +109,16 @@ def render_course_hole_by_hole_section(variables: Variables) -> None:
         # Render fairway accuracy expander
         with st.expander(label="Fairway Accuracy Overview", expanded=True):
 
-            # Aggregate fairway data and generate figure
+            # Aggregate fairway data and generate figure and render figure
             fairway_df = aggregate_fairway_data(data)
-            fig = plot_fairways_hit(fairway_df)
-
-            # Plot figure
-            st.plotly_chart(fig)
+            st.plotly_chart(plot_fairways_hit(fairway_df))
 
     # Render stroke performance expander
     with st.expander(label="Stroke Performance Overview", expanded=True):
 
-        # Transform strokes taken data and generate figure
+        # Transform strokes taken data and generate figure and render figure
         strokes_df = transform_stroke_per_hole_data(data=data)
-        fig = plot_strokes_per_hole(df=strokes_df)
-
-        # Render figure
-        st.plotly_chart(fig)
+        st.plotly_chart(plot_strokes_per_hole(df=strokes_df))
 
 def render_trackman_club_analysis() -> None:
     """
