@@ -2,7 +2,6 @@
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.express as px
-import streamlit as st
 import pandas as pd
 
 def plot_final_trajectory_contour(df: pd.DataFrame) -> go.Figure:
@@ -20,8 +19,7 @@ def plot_final_trajectory_contour(df: pd.DataFrame) -> go.Figure:
                            columns representing the coordinates of the shots.
 
     Returns:
-        None: This function does not return any value. It displays the plot in
-              a Streamlit application.
+        Returns: go.Figure: final trajectory contour plot
     """
     # Generate plotly go contour plot
     fig = go.Figure(
@@ -84,7 +82,7 @@ def plot_fairways_hit(df: pd.DataFrame) -> go.Figure:
 
     return fig
 
-def plot_strokes_per_hole(df: pd.DataFrame):
+def plot_strokes_per_hole(df: pd.DataFrame) -> px.bar:
     """
     Plot a stacked bar chart of strokes per round.
 
@@ -130,4 +128,4 @@ def plot_strokes_per_hole(df: pd.DataFrame):
         yaxis_title="Strokes"
     )
 
-    st.plotly_chart(fig)
+    return fig
