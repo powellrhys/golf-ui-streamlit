@@ -1,40 +1,37 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.7.0"]
+build-backend = "poetry.core.masonry.api"
 
-[tool.setuptools]
-packages = ["backend", "frontend", "shared", "infra"]
-
-[project]
+[tool.poetry]
 name = "golf-ui-streamlit"
 version = "0.1.0"
 description = "Python project to display personal golf analytics using streamlit"
-authors = [
-    { name = "Rhys powell"}
+authors = ["Rhys Powell <youremail@example.com>"]
+packages = [
+    { include = "backend" },
+    { include = "frontend" },
+    { include = "shared" }
 ]
 
-dependencies = [
-    "azure-storage-blob==12.24.0",
-    "python-dotenv==1.0.1",
-]
+[tool.poetry.dependencies]
+python = "^3.10"
+azure-storage-blob = "12.24.0"
+python-dotenv = "1.0.1"
+selenium = "4.25.0"
+streamlit = "1.46.0"
+Authlib = "1.5.1"
+pandas = "2.2.3"
+plotly = "5.24.1"
+streamlit-components = { git = "https://github.com/powellrhys/python-streamlit-components.git", tag = "v0.1.5" }
+behave = "1.2.6"
+pytest = "8.3.4"
+pytest-cov = "5.0.0"
 
-[project.optional-dependencies]
-backend = [
-    "selenium==4.25.0"
-]
-frontend = [
-    "streamlit==1.46.0",
-    "Authlib==1.5.1",
-    "pandas==2.2.3",
-    "plotly==5.24.1",
-    "streamlit-components @ git+https://github.com/powellrhys/python-streamlit-components.git@v0.1.5"
-]
-testing = [
-    "behave==1.2.6",
-    "pytest==8.3.4",
-    "pytest-cov==5.0.0"
-]
+[tool.poetry.extras]
+backend = ["selenium"]
+frontend = ["streamlit", "Authlib", "pandas", "plotly", "streamlit-components"]
+testing = ["behave", "pytest", "pytest-cov"]
 
-[project.scripts]
+[tool.poetry.scripts]
 collect-trackman-data = "backend.collect_trackman_data:main"
 collect-scorecard-data = "backend.collect_scorecard_data:main"
