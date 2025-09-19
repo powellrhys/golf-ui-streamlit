@@ -5,9 +5,7 @@ import plotly.express as px
 import streamlit as st
 import pandas as pd
 
-def plot_final_trajectory_contour(
-    df: pd.DataFrame
-) -> None:
+def plot_final_trajectory_contour(df: pd.DataFrame) -> go.Figure:
     """
     Plots a 2D contour plot of the final shot trajectory using Plotly.
 
@@ -46,8 +44,7 @@ def plot_final_trajectory_contour(
         )
     ))
 
-    # Display in Streamlit
-    st.plotly_chart(fig)
+    return fig
 
 def plot_fairways_hit(df: pd.DataFrame) -> go.Figure:
     """

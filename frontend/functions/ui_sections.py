@@ -109,22 +109,16 @@ def render_course_hole_by_hole_section(variables: Variables) -> None:
         # Render fairway accuracy expander
         with st.expander(label="Fairway Accuracy Overview", expanded=True):
 
-            # Aggregate fairway data and generate figure
+            # Aggregate fairway data and generate figure and render figure
             fairway_df = aggregate_fairway_data(data)
-            fig = plot_fairways_hit(fairway_df)
-
-            # Plot figure
-            st.plotly_chart(fig)
+            st.plotly_chart(plot_fairways_hit(fairway_df))
 
     # Render stroke performance expander
     with st.expander(label="Stroke Performance Overview", expanded=True):
 
-        # Transform strokes taken data and generate figure
+        # Transform strokes taken data and generate figure and render figure
         strokes_df = transform_stroke_per_hole_data(data=data)
-        fig = plot_strokes_per_hole(df=strokes_df)
-
-        # Render figure
-        st.plotly_chart(fig)
+        st.plotly_chart(plot_strokes_per_hole(df=strokes_df))
 
 def render_trackman_club_analysis() -> None:
     """
