@@ -13,10 +13,11 @@ from .data_functions import (
     aggregate_fairway_data,
     extract_stat_flags
 )
-from .ui_components import display_club_metrics
+from .ui_components import display_club_summary_shot_trajectories, display_club_metrics
 from .navigation import get_navigation
 
 __all__ = [
+    "display_club_summary_shot_trajectories",
     "render_course_hole_by_hole_section",
     "render_trackman_session_analysis",
     "transform_stroke_per_hole_data",
