@@ -26,7 +26,7 @@ COPY . /app
 RUN chmod +x /app/entrypoint.sh
 
 # Install only frontend extras and core dependencies
-RUN poetry install --without dev --extras "frontend"
+RUN poetry install --only main --extras "frontend"
 
 # Expose Streamlit port
 ENV PORT=8501
