@@ -3,6 +3,7 @@ from .ui_components import display_club_summary_shot_trajectories
 from streamlit_components.plot_functions import PlotlyPlotter
 from .plots import plot_strokes_per_hole, plot_fairways_hit
 from .data_functions import (
+    summarise_hole_performance_data,
     transform_stroke_per_hole_data,
     collect_yardage_summary_data,
     aggregate_fairway_data,
@@ -305,3 +306,43 @@ def render_club_yardage_analysis() -> None:
             y=dist_metric,
             color="Club",
             markers='o').plot_line())
+
+def render_course_overview(variables: Variables) -> None:
+    """
+    """
+    # Define page title
+    st.title(f'{variables.golf_course_name.capitalize()} Course Overview Analysis')
+
+    # Define column object
+    columns = st.columns([1, 1, 3])
+
+    # Within the first column, render a metric of interest pills object
+    with columns[0]:
+        metric = st.pills(label="Metric of Interest", options=["Avg Strokes", "Strokes To Par"], default="Avg Strokes")
+
+    # Within the second column, render a number of round slider component
+    with columns[1]:
+        rounds = st.slider(label="Last N Rounds", min_value=10, max_value=100, value=10)
+
+    # Create dataframe of hole by hole summary
+    df = summarise_hole_performance_data(variables=variables, rounds=rounds)
+
+    # Render a streamlit expander component
+    with st.expander(label="Hole by Hole Overview", expanded=True):
+
+        # Create a bar plot of the data
+        fig = PlotlyPlotter(
+            df,
+            x="Hole",
+            y=metric,
+            color="Par",
+            color_discrete_map={"3": "#2ca02c", "4": "#1f77b4", "5": "#ff7f0e"},
+            category_orders={"Par": ["3", "4", "5"]},
+            title=f"{metric} Breakdown on Each Hole",
+            text=metric).plot_bar()
+
+        # Preserve hole order
+        fig.update_layout(xaxis=dict(categoryorder="array", categoryarray=df["Hole"]))
+
+        # Show the figure
+        st.plotly_chart(fig)

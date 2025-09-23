@@ -86,3 +86,28 @@ class RoundAggregator(BlobClient):
                 data=sorted_holes,
                 container='golf',
                 output_filename=f'{self.vars.golf_course_name}_golf_course_hole_summary/hole_{hole_num}.json')
+
+    def summarize_course_strokes(self) -> None:
+        """
+        """
+        strokes = []
+        for hole in range(1, 19, 1):
+            self.logger.info(f"Collecting strokes for hole: {hole}")
+
+            hole_data = self.read_blob_to_dict(container="golf",
+                                               input_filename=f"creigiau_golf_course_hole_summary/hole_{hole}.json")
+
+            strokes.append(
+                {
+                    f"Hole {hole}": {
+                        "Par": hole_data[0]["Par"],
+                        "Strokes": [stroke["Strokes"] for stroke in hole_data]
+                    }
+                }
+            )
+
+        # Export aggregated data to blob
+        self.export_dict_to_blob(
+            data=strokes,
+            container='golf',
+            output_filename=f'{self.vars.golf_course_name}_golf_course_hole_summary/course_overview.json')
