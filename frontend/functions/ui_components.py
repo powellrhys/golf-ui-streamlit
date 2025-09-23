@@ -94,4 +94,4 @@ def display_club_summary_shot_trajectories(data: list, total_shots: int | None =
     with st.expander(label='Shot Distribution', expanded=True):
 
         # Generate plotly go contour plot
-        plot_final_trajectory_contour(df=final_end_df)
+        st.plotly_chart(plot_final_trajectory_contour(df=final_end_df))
