@@ -63,7 +63,6 @@ class TestVariables:
             "general": {
                 "blob_storage_connection_string": "secret_blob_conn",
                 "golf_course_name": "Augusta National",
-                "round_site_player_name": "Jack Nicklaus"
             }
         }
 
@@ -77,7 +76,6 @@ class TestVariables:
             # Verify attributes are correctly loaded from secrets
             assert vars_obj.blob_account_connection_string == "secret_blob_conn"
             assert vars_obj.golf_course_name == "Augusta National"
-            assert vars_obj.round_site_player_name == "Jack Nicklaus"
 
             # Defaults for unspecified attributes come from os.getenv or fallback
             assert vars_obj.chromedriver_path == "chromedriver.exe"

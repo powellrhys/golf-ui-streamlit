@@ -18,5 +18,5 @@ if not st.user.is_logged_in:
 
 # Render application if user is logged in
 if st.user.is_logged_in:
-    pg = get_navigation(vars=Variables())
+    pg = get_navigation(vars=Variables(source="frontend"))
     pg.run()
