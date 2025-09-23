@@ -1,6 +1,6 @@
 # Import dependencies
-from unittest.mock import patch, MagicMock
 from frontend import display_club_summary_shot_trajectories, display_club_metrics
+from unittest.mock import patch, MagicMock, call
 
 def test_display_club_metrics():
     # Test data
@@ -95,7 +95,7 @@ def test_display_club_summary_shot_trajectories():
         )
 
         # Verify st.plotly_chart rendered the fake plot
-        mock_plotly_chart.assert_called_once_with("fake_plot")
+        mock_plotly_chart.assert_has_calls([call("fake_plot"), call(mock_contour.return_value)])
 
         # Verify the contour plot function was called with the final end dataframe
         mock_contour.assert_called_once_with(df=fake_final_end_df)
