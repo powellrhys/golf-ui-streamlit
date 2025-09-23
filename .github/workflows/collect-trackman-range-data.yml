@@ -27,6 +27,12 @@ jobs:
         with:
           python-version: 3.13
 
+      # Install Poetry
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
       # Configure and install Chrome
       - name: Set up Chrome
         run: |
@@ -40,11 +46,10 @@ jobs:
           sudo apt-get install -y chromium-chromedriver
           chromedriver --version
 
-      # Install project dependencies
+      # Install project dependencies via Poetry
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          poetry install --no-interaction --no-root
 
       # Run data collection script - Trackman
       - name: Run Data Collection Script
