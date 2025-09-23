@@ -59,4 +59,4 @@ jobs:
           golf_course_name: ${{ secrets.golf_course_name }}
           trackman_username: ${{ secrets.trackman_username }}
           trackman_password: ${{ secrets.trackman_password }}
-        run: poetry run python -m backend.collect_scorecard_data
+        run: poetry run python -m backend.collect_trackman_data
