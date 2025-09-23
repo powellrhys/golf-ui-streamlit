@@ -267,6 +267,23 @@ def collect_yardage_summary_data(
 
 def summarise_hole_performance_data(variables: Variables, rounds: int) -> pd.DataFrame:
     """
+    Summarises golf hole performance data for a given course.
+
+    This function retrieves hole performance data from blob storage,
+    calculates the average strokes over the specified number of rounds,
+    and returns a DataFrame with hole number, average strokes, par value,
+    and strokes-to-par.
+
+    Args:
+        variables (Variables): Object containing golf course metadata (e.g., course name).
+        rounds (int): Number of rounds to include when calculating averages.
+
+    Returns:
+        pd.DataFrame: A dataframe containing columns:
+            - "Hole" (str): Hole identifier (e.g., "Hole 1").
+            - "Avg Strokes" (float): Average strokes across the specified rounds.
+            - "Par" (str): Par value for the hole.
+            - "Strokes To Par" (str): Difference between average strokes and par, rounded to 1 decimal place.
     """
     # Read data from blob storage
     data = BlobClient(source="frontend") \
