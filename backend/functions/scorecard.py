@@ -90,3 +90,8 @@ class Hole19Scrapper:
         self.logger.info("Aggregating data at hole level...")
         self.aggregator.aggregate_holes_by_course()
         self.logger.info("Data aggregated to hole level \n")
+
+        # Summarise data at a hole level
+        self.logger.info("Aggregating data for each hole...")
+        self.aggregator.summarize_course_strokes()
+        self.logger.info("Data aggregated for each hole \n")

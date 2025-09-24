@@ -4,6 +4,7 @@ from .ui_sections import (
     render_trackman_session_analysis,
     render_trackman_club_analysis,
     render_club_yardage_analysis,
+    render_course_overview,
     render_hole_metrics
 )
 from .data_functions import (
@@ -26,6 +27,7 @@ __all__ = [
     "collect_yardage_summary_data",
     "render_club_yardage_analysis",
     "aggregate_fairway_data",
+    "render_course_overview",
     "display_club_metrics",
     "render_hole_metrics",
     "extract_stat_flags",

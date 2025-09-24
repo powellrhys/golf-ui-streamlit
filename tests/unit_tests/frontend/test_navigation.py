@@ -20,7 +20,7 @@ def test_get_navigation():
 
         # Assert values
         assert result == "fake_nav_object"
-        assert mock_page.call_count == 5
+        assert mock_page.call_count == 6
 
         # Assert expected values in mocked object
         mock_nav.assert_called_once()

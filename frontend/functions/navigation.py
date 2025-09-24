@@ -25,7 +25,10 @@ def get_navigation(vars: Variables) -> st.navigation:
         ],
         f"{vars.golf_course_name.capitalize()} Golf Course Analysis": [
             st.Page(page="pages/course_hole_by_hole_analysis.py",
-                    title="Hole by Hole Analysis", icon="🏌")]
+                    title="Hole by Hole Analysis", icon="🏌"),
+            st.Page(page="pages/course_overview.py",
+                    title="Course Overview", icon="⛳")
+        ]
     }
 
     # Construct streamlit navigation object

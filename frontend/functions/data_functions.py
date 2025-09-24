@@ -1,5 +1,5 @@
 # Import dependencies
-from shared import BlobClient
+from shared import BlobClient, Variables
 import pandas as pd
 
 def transform_stroke_per_hole_data(data: list) -> pd.DataFrame:
@@ -264,3 +264,54 @@ def collect_yardage_summary_data(
     df_long = df_long.sort_values(by="Club")
 
     return yardage_df, df_long
+
+def summarise_hole_performance_data(variables: Variables, rounds: int) -> pd.DataFrame:
+    """
+    Summarises golf hole performance data for a given course.
+
+    This function retrieves hole performance data from blob storage,
+    calculates the average strokes over the specified number of rounds,
+    and returns a DataFrame with hole number, average strokes, par value,
+    and strokes-to-par.
+
+    Args:
+        variables (Variables): Object containing golf course metadata (e.g., course name).
+        rounds (int): Number of rounds to include when calculating averages.
+
+    Returns:
+        pd.DataFrame: A dataframe containing columns:
+            - "Hole" (str): Hole identifier (e.g., "Hole 1").
+            - "Avg Strokes" (float): Average strokes across the specified rounds.
+            - "Par" (str): Par value for the hole.
+            - "Strokes To Par" (str): Difference between average strokes and par, rounded to 1 decimal place.
+    """
+    # Read data from blob storage
+    data = BlobClient(source="frontend") \
+        .read_blob_to_dict(container="golf",
+                           input_filename=f'{variables.golf_course_name}_golf_course_hole_summary/course_overview.json')
+
+    # Filter data and create a list of dictionaries of the required data
+    filtered_data = [
+        {
+            f"Hole {index}": {
+                "Avg Strokes":
+                    sum(hole[f"Hole {index}"]["Strokes"][0:rounds]) / len(hole[f"Hole {index}"]["Strokes"][0:rounds]),
+                "Par": hole[f"Hole {index}"]["Par"]
+            }
+        } for index, hole in enumerate(data, start=1)]
+
+    # Flatten into a dataframe
+    df = pd.DataFrame([
+        {"Hole": list(d.keys())[0],
+         "Avg Strokes": list(d.values())[0]["Avg Strokes"],
+         "Par": list(d.values())[0]["Par"]} for d in filtered_data
+    ])
+
+    # Generate a strokes to par column within dataframe
+    df["Strokes To Par"] = df["Avg Strokes"] - df["Par"]
+    df["Strokes To Par"] = df["Strokes To Par"].round(1).astype(str)
+
+    # Ensure Par is string type for mapping
+    df["Par"] = df["Par"].astype(str)
+
+    return df
