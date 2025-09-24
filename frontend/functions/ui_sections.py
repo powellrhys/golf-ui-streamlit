@@ -243,6 +243,9 @@ def render_club_yardage_analysis() -> None:
     Returns:
         None
     """
+    # Render page title
+    st.title('Trackman Yardages')
+
     # Define column object
     columns = st.columns([1, 1, 1])
 
@@ -279,9 +282,6 @@ def render_club_yardage_analysis() -> None:
             avg_stats=avg_stats,
             dist_metric=dist_metric
         )
-
-    # Render page title
-    st.title('Trackman Yardages')
 
     # Render Yardage table expander
     with st.expander(label='Yardage Table',
