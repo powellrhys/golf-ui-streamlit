@@ -102,10 +102,11 @@ class RoundAggregator(BlobClient):
         for hole in range(1, 19, 1):
             self.logger.info(f"Collecting strokes for hole: {hole}")
 
+            # Define input file name
+            input_filename = f"{self.vars.golf_course_name}_golf_course_hole_summary/hole_{hole}.json"
+
             # Read data from blob
-            hole_data = self \
-                .read_blob_to_dict(container="golf",
-                                   input_filename=f"{self.vars.golf_course_name}_course_hole_summary/hole_{hole}.json")
+            hole_data = self.read_blob_to_dict(container="golf", input_filename=input_filename)
 
             # Append data to strokes list
             strokes.append(
