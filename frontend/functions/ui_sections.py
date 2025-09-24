@@ -309,6 +309,15 @@ def render_club_yardage_analysis() -> None:
 
 def render_course_overview(variables: Variables) -> None:
     """
+    Render an interactive course overview analysis in Streamlit.
+
+    Displays course-level metrics, allows users to select a metric of
+    interest and number of rounds, summarizes hole-by-hole performance,
+    and visualizes the results in a bar chart.
+
+    Args: variables (Variables) - Project variables class
+
+    Return: None
     """
     # Define page title
     st.title(f'{variables.golf_course_name.capitalize()} Course Overview Analysis')

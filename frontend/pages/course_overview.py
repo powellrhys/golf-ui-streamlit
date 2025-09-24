@@ -15,5 +15,5 @@ if not st.user.is_logged_in:
 # If logged in, render page components
 if st.user.is_logged_in:
 
-    # Render course hole by hole section
+    # Render course overview section
     render_course_overview(variables=Variables(source="frontend"))
