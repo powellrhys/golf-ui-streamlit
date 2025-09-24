@@ -14,7 +14,7 @@ if not st.user.is_logged_in:
 if st.user.is_logged_in:
 
     # Render page title
-    st.title("Golf Analysis Home")
+    st.title("Golf Analysis Dashboard")
 
     # Render container
     with st.container(border=True):
