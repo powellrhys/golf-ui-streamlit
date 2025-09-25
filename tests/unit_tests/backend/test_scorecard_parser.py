@@ -1,5 +1,5 @@
 # Import dependencies
-from backend import ScorecardParser
+from backend.functions.scorecard_parser import ScorecardParser
 from unittest.mock import MagicMock
 from datetime import date
 import logging

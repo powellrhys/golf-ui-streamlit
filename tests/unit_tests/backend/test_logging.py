@@ -1,5 +1,5 @@
 # Import dependencies
-from backend import configure_logging
+from backend.functions.logging import configure_logging
 import warnings
 import logging
 

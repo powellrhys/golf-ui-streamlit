@@ -57,7 +57,7 @@ class Hole19Scrapper:
         # Collect round urls
         self.logger.info("Collecting round urls...")
         urls = self.navigator.collect_round_urls()
-        self.logger.info("Round url collect \n")
+        self.logger.info("Round url collected \n")
 
         # Close down selenium driver
         self.logger.info("Closing driver...")
@@ -68,30 +68,40 @@ class Hole19Scrapper:
         self.parser = ScorecardParser(logger=self.logger, driver_path=driver_path, headless=headless)
         self.parser.initiate_driver()
 
-        # Iterate through urls and collect scorecard data
-        for index, url in enumerate(iterable=urls, start=1):
-            try:
-                # Log progress message
-                self.logger.info(f"Scraping round {index} of {len(urls)}")
+        # Identify new scorecard records to scrape
+        self.logger.info("Identifying new scorecard data to scrape...")
+        new_urls = self.parser.identify_new_data(scorecard_urls=urls)
+        self.logger.info("New scorecard data identified \n")
 
-                # Collect Scorecard Data
-                scorecard, file_name = self.parser.collect_scorecard_data(url=url)
+        # Iterate through new scorecard urls and collect scorecard data
+        if new_urls:
 
-                # Export data to blob
-                BlobClient().export_dict_to_blob(data=scorecard, container="golf", output_filename=file_name)
+            for index, url in enumerate(iterable=new_urls, start=1):
+                try:
+                    # Log progress message
+                    self.logger.info(f"Scraping round {index} of {len(new_urls)}")
 
-            except BaseException as e:
-                self.logger.error(f"Failed to collect and export scorecard data - {e}")
+                    # Collect Scorecard Data
+                    scorecard, file_name = self.parser.collect_scorecard_data(url=url)
 
-        # Initiate Round Aggregator
-        self.aggregator = RoundAggregator(logger=self.logger)
+                    # Export data to blob
+                    BlobClient().export_dict_to_blob(data=scorecard, container="golf", output_filename=file_name)
 
-        # Aggregate round data
-        self.logger.info("Aggregating data at hole level...")
-        self.aggregator.aggregate_holes_by_course()
-        self.logger.info("Data aggregated to hole level \n")
+                except BaseException as e:
+                    self.logger.error(f"Failed to collect and export scorecard data - {e}")
 
-        # Summarise data at a hole level
-        self.logger.info("Aggregating data for each hole...")
-        self.aggregator.summarize_course_strokes()
-        self.logger.info("Data aggregated for each hole \n")
+            # Initiate Round Aggregator
+            self.aggregator = RoundAggregator(logger=self.logger)
+
+            # Aggregate round data
+            self.logger.info("Aggregating data at hole level...")
+            self.aggregator.aggregate_holes_by_course()
+            self.logger.info("Data aggregated to hole level \n")
+
+            # Summarise data at a hole level
+            self.logger.info("Aggregating data for each hole...")
+            self.aggregator.summarize_course_strokes()
+            self.logger.info("Data aggregated for each hole \n")
+
+        else:
+            self.logger.info("Pipeline Complete - No new scorecard data recorded since last pipeline run")

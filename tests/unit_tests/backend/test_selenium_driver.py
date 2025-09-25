@@ -1,6 +1,6 @@
 # Import dependencies
+from backend.functions.selenium_driver import SeleniumDriver
 from unittest.mock import patch, MagicMock
-from backend import SeleniumDriver
 
 class TestSeleniumDriver:
     """

@@ -1,8 +1,8 @@
-import pytest
+# Import dependencies
+from backend.functions.scorecard_parser import ScorecardParser
 from unittest.mock import MagicMock
-from backend import ScorecardParser
 import logging
-
+import pytest
 
 class TestParseScorecardRowsIntegration:
     """
