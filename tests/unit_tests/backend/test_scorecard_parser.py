@@ -1,6 +1,6 @@
 # Import dependencies
 from backend.functions.scorecard_parser import ScorecardParser
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from datetime import date
 import logging
 import pytest
@@ -615,3 +615,23 @@ class TestAnnotateResults:
 
         for hole, expected in zip(result, expected_results):
             assert hole["result"] == expected
+
+class TestIdentifyNewData:
+    def test_returns_only_missing_ids(self):
+        scorecard_urls = [
+            "https://www.hole19golf.com/performance/rounds/12345",
+            "https://www.hole19golf.com/performance/rounds/67890",
+            "https://www.hole19golf.com/performance/rounds/99999",
+        ]
+
+        collected_files = [
+            "scorecard_12345.json",
+            "scorecard_67890.json",
+        ]
+
+        obj = ScorecardParser(logger=logging.Logger)
+
+        with patch.object(obj, "list_blob_filenames", return_value=collected_files):
+            new_data = obj.identify_new_data(scorecard_urls)
+
+        assert new_data == ["https://www.hole19golf.com/performance/rounds/99999"]
