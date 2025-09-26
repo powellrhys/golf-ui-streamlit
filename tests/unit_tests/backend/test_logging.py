@@ -58,7 +58,7 @@ class TestConfigureLogging:
 
         # Assert logging format
         formatter = handler.formatter
-        assert formatter._fmt == '%(asctime)s - %(message)s'
+        assert formatter._fmt == '%(asctime)s - %(levelname)s - %(message)s'
 
     def test_warnings_are_ignored(self):
         """

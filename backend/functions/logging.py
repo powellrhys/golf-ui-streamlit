@@ -53,7 +53,7 @@ def configure_logging() -> logging.Logger:
 
     # Configure Logger
     logger = logging.getLogger('BASIC')
-    logger.setLevel(logging.DEBUG)  # Allow all levels; filter in handler if needed
+    logger.setLevel(logging.INFO)
 
     # Create formatter with timestamp, levelname, and message
     formatter = ColorFormatter('%(asctime)s - %(levelname)s - %(message)s')
