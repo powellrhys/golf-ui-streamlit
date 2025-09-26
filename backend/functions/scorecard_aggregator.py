@@ -46,20 +46,21 @@ class RoundAggregator(BlobClient):
             # Make sure container file is a json file and has the course of interest in the name
             if filename.lower().endswith(".json") and self.vars.golf_course_name.lower() in filename.lower():
 
-                # Extract date from filename using regex
-                match = re.search(r"(\d{4}-\d{2}-\d{2})\.json$", filename)
-                if not match:
-                    self.logger.info(f"Skipping file with unexpected format: {filename}")
+                # Find date in filename
+                match = re.search(r"\d{4}-\d{2}-\d{2}", filename)
+                if match:
+                    file_date = match.group(0)
+                else:
+                    self.logger.warning("A file was skipped as no valid round date could be found")
                     continue
 
-                # Read file from blob storage
-                file_date = match.group(1)
+                self.logger.info(f"Collecting scorecard from the {file_date}...")
                 try:
                     round_data = self.read_blob_to_dict(container="golf", input_filename=filename)
 
                 # Handle exception if file could not be read
                 except Exception as e:
-                    self.logger.error(f"Error reading {filename}: {e}")
+                    self.logger.error(f"Error reading round data from the {file_date}: {e}")
                     continue
 
                 # Iterate through each hole and append data to hole data map

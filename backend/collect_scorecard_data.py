@@ -1,6 +1,6 @@
+# Import dependencies
+from backend.functions.logging import configure_logging
 from backend.functions.scorecard import Hole19Scrapper
-from backend.functions import configure_logging
-
 from shared import Variables
 
 # Configure logger

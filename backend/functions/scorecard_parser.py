@@ -1,12 +1,12 @@
 # Import dependencies
 from selenium.webdriver.common.by import By
 from .selenium_driver import SeleniumDriver
+from shared import Variables, BlobClient
 from datetime import datetime, date
-from shared import Variables
 import logging
 import re
 
-class ScorecardParser(SeleniumDriver):
+class ScorecardParser(SeleniumDriver, BlobClient):
     """
     Parses golf scorecards from the Hole19 website.
 
@@ -62,6 +62,7 @@ class ScorecardParser(SeleniumDriver):
             try:
                 hit = cell.find_element(By.CSS_SELECTOR, 'div.fairway-hit.scorecard-icon')
                 classes = hit.get_attribute('class').split()
+
                 if 'left' in classes:
                     directions.append('Left')
                 elif 'target' in classes:
@@ -73,7 +74,7 @@ class ScorecardParser(SeleniumDriver):
             except BaseException:
                 directions.append('N/A')
 
-            return directions
+        return directions
 
     def parse_gir(self, cell_elements: list) -> list[bool]:
         """
@@ -377,6 +378,29 @@ class ScorecardParser(SeleniumDriver):
 
         return results
 
+    def identify_new_data(self, scorecard_urls: list) -> list:
+        """
+        Identify new Hole19 scorecards that are not yet stored in blob storage.
+
+        Extracts scorecard IDs from the provided URLs, compares them with IDs of
+        scorecards already saved in the "golf/scorecards" container, and returns
+        the URLs of scorecards that are new.
+
+        Args:
+            scorecard_urls (list): List of Hole19 scorecard URLs to check.
+
+        Returns:
+            list: List of scorecard URLs corresponding to new scorecards not yet collected.
+        """
+        scorecard_ids = [url.split("/")[-1] for url in scorecard_urls]
+
+        collected_scorecard = self.list_blob_filenames(container_name="golf", directory_path="scorecards")
+
+        collected_scorecard_ids = [file.split("_")[-1].replace(".json", "") for file in collected_scorecard]
+
+        return [f"https://www.hole19golf.com/performance/rounds/{id}"
+                for id in list(set(scorecard_ids) - set(collected_scorecard_ids))]
+
     def collect_scorecard_data(self, url: str) -> tuple[list[dict], str]:
         """
         Collect and process scorecard data from a URL.
@@ -395,7 +419,7 @@ class ScorecardParser(SeleniumDriver):
         self.driver.get(url)
         round_date = self.get_round_date()
         course_name = self.get_course_name()
-        file_name = f'scorecards/{course_name}_{round_date}.json'
+        file_name = f'scorecards/{course_name}_{round_date}_{url.split("/")[-1]}.json'
 
         # Collect scorecard data
         scorecard_section = self.driver.find_element(By.CSS_SELECTOR, 'section.round-scorecard')
