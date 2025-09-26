@@ -35,61 +35,61 @@ class Hole19Scrapper:
 
         Raises: BaseException: If scorecard data cannot be collected or exported.
         """
-        # Initiate Hole19Navigator object
-        self.navigator = Hole19Navigator(logger=self.logger, driver_path=driver_path, headless=headless)
-        self.navigator.initiate_driver()
+        # # Initiate Hole19Navigator object
+        # self.navigator = Hole19Navigator(logger=self.logger, driver_path=driver_path, headless=headless)
+        # self.navigator.initiate_driver()
 
-        # Login to Hole 19 website and collect scorecard urls
-        self.logger.info("Logging into Hole 19...")
-        self.navigator.login_to_website()
-        self.logger.info("Login to Hole 19 completed \n")
+        # # Login to Hole 19 website and collect scorecard urls
+        # self.logger.info("Logging into Hole 19...")
+        # self.navigator.login_to_website()
+        # self.logger.info("Login to Hole 19 completed \n")
 
-        # Navigate to performance tab
-        self.logger.info("Navigating to hole 19 performance tab...")
-        self.navigator.navigate_to_performance_tab()
-        self.logger.info("Performance tab navigated to successfully \n")
+        # # Navigate to performance tab
+        # self.logger.info("Navigating to hole 19 performance tab...")
+        # self.navigator.navigate_to_performance_tab()
+        # self.logger.info("Performance tab navigated to successfully \n")
 
-        # Load all rounds into memory
-        self.logger.info("Loading all scorecards into view...")
-        self.navigator.load_all_hole19_rounds()
-        self.logger.info("All scorecards loaded into view \n")
+        # # Load all rounds into memory
+        # self.logger.info("Loading all scorecards into view...")
+        # self.navigator.load_all_hole19_rounds()
+        # self.logger.info("All scorecards loaded into view \n")
 
-        # Collect round urls
-        self.logger.info("Collecting round urls...")
-        urls = self.navigator.collect_round_urls()
-        self.logger.info("Round url collected \n")
+        # # Collect round urls
+        # self.logger.info("Collecting round urls...")
+        # urls = self.navigator.collect_round_urls()
+        # self.logger.info("Round url collected \n")
 
-        # Close down selenium driver
-        self.logger.info("Closing driver...")
-        self.navigator.driver.close()
-        self.logger.info("Driver successfully closed \n")
+        # # Close down selenium driver
+        # self.logger.info("Closing driver...")
+        # self.navigator.driver.close()
+        # self.logger.info("Driver successfully closed \n")
 
-        # Initiate Scorecard Parser object
-        self.parser = ScorecardParser(logger=self.logger, driver_path=driver_path, headless=headless)
-        self.parser.initiate_driver()
+        # # Initiate Scorecard Parser object
+        # self.parser = ScorecardParser(logger=self.logger, driver_path=driver_path, headless=headless)
+        # self.parser.initiate_driver()
 
-        # Identify new scorecard records to scrape
-        self.logger.info("Identifying new scorecard data to scrape...")
-        new_urls = self.parser.identify_new_data(scorecard_urls=urls)
-        self.logger.info("New scorecard data identified \n")
+        # # Identify new scorecard records to scrape
+        # self.logger.info("Identifying new scorecard data to scrape...")
+        # new_urls = self.parser.identify_new_data(scorecard_urls=urls)
+        # self.logger.info("New scorecard data identified \n")
 
-        # Iterate through new scorecard urls and collect scorecard data
-        if new_urls:
+        # # Iterate through new scorecard urls and collect scorecard data
+        # if new_urls:
 
-            for index, url in enumerate(iterable=new_urls, start=1):
-                try:
-                    # Log progress message
-                    self.logger.info(f"Scraping round {index} of {len(new_urls)}")
+        #     for index, url in enumerate(iterable=new_urls, start=1):
+        #         try:
+        #             # Log progress message
+        #             self.logger.info(f"Scraping round {index} of {len(new_urls)}")
 
-                    # Collect Scorecard Data
-                    scorecard, file_name = self.parser.collect_scorecard_data(url=url)
+        #             # Collect Scorecard Data
+        #             scorecard, file_name = self.parser.collect_scorecard_data(url=url)
 
-                    # Export data to blob
-                    BlobClient().export_dict_to_blob(data=scorecard, container="golf", output_filename=file_name)
+        #             # Export data to blob
+        #             BlobClient().export_dict_to_blob(data=scorecard, container="golf", output_filename=file_name)
 
-                except BaseException as e:
-                    self.logger.error(f"Failed to collect and export scorecard data - {e}")
-
+        #         except BaseException as e:
+                    # self.logger.error(f"Failed to collect and export scorecard data - {e}")
+        if 1 == 1:
             # Initiate Round Aggregator
             self.aggregator = RoundAggregator(logger=self.logger)
 

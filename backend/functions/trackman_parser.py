@@ -7,12 +7,27 @@ import time
 
 class TrackManParser(SeleniumDriver, BlobClient):
     """
+    A parser for collecting and managing TrackMan range session data.
+
+    This class integrates Selenium-based automation utilities with Azure Blob
+    Storage client functionality to:
+      - Retrieve session IDs via the TrackMan GraphQL API.
+      - Identify new sessions not yet collected.
+      - Download and upload session data into Azure Blob Storage.
+
+    It inherits from:
+        SeleniumDriver: Provides driver configuration and web automation tools.
+        BlobClient: Provides methods to interact with Azure Blob Storage.
     """
     def __init__(
         self,
         logger: logging.Logger,
     ) -> None:
         """
+        Initialize the TrackManParser with logging and configuration variables.
+
+        Args:
+            logger (logging.Logger): Logger instance for structured logging.
         """
         super().__init__()
         self.logger = logger
@@ -94,6 +109,15 @@ class TrackManParser(SeleniumDriver, BlobClient):
 
     def identify_new_data(self, range_session_ids: list) -> list:
         """
+        Identify TrackMan session IDs that have not yet been collected.
+
+        Compares the provided list of session IDs against session summary files
+        already stored in the "golf/trackman_session_summary" blob container.
+        Any session IDs not present in storage are returned as new.
+
+        Args: range_session_ids (list): A list of session IDs to check for new data.
+
+        Returns: list: A list of session IDs that are not yet collected.
         """
         collected_sessions = self.list_blob_filenames(container_name="golf", directory_path="trackman_session_summary")
 

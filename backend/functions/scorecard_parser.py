@@ -62,6 +62,7 @@ class ScorecardParser(SeleniumDriver, BlobClient):
             try:
                 hit = cell.find_element(By.CSS_SELECTOR, 'div.fairway-hit.scorecard-icon')
                 classes = hit.get_attribute('class').split()
+
                 if 'left' in classes:
                     directions.append('Left')
                 elif 'target' in classes:
@@ -73,7 +74,7 @@ class ScorecardParser(SeleniumDriver, BlobClient):
             except BaseException:
                 directions.append('N/A')
 
-            return directions
+        return directions
 
     def parse_gir(self, cell_elements: list) -> list[bool]:
         """
@@ -379,6 +380,17 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
     def identify_new_data(self, scorecard_urls: list) -> list:
         """
+        Identify new Hole19 scorecards that are not yet stored in blob storage.
+
+        Extracts scorecard IDs from the provided URLs, compares them with IDs of
+        scorecards already saved in the "golf/scorecards" container, and returns
+        the URLs of scorecards that are new.
+
+        Args:
+            scorecard_urls (list): List of Hole19 scorecard URLs to check.
+
+        Returns:
+            list: List of scorecard URLs corresponding to new scorecards not yet collected.
         """
         scorecard_ids = [url.split("/")[-1] for url in scorecard_urls]
 

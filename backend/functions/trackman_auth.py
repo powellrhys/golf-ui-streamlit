@@ -10,6 +10,23 @@ import json
 
 class TrackManAuth(AbstractDataCollection, SeleniumDriver):
     """
+    Handles authentication and access token retrieval for the TrackMan Golf portal.
+
+    This class provides methods to:
+      - Configure and initiate a Selenium WebDriver session.
+      - Automate the login process to the TrackMan web portal using stored credentials.
+      - Retrieve an API access token required for authenticated requests.
+
+    It inherits from:
+        AbstractDataCollection: Base interface for data collection functionality.
+        SeleniumDriver: Provides driver configuration and Selenium interaction utilities.
+
+    Typical usage example:
+        logger = logging.getLogger(__name__)
+        trackman_auth = TrackManAuth(logger, driver_path="chromedriver.exe", headless=True)
+        trackman_auth.initiate_driver()
+        trackman_auth.login_to_website()
+        token = trackman_auth.collect_trackman_access_token()
     """
     def __init__(
         self,

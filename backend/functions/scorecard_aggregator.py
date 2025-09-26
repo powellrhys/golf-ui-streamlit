@@ -3,7 +3,6 @@ from shared import Variables, BlobClient
 from collections import defaultdict
 from datetime import datetime
 import logging
-import re
 
 class RoundAggregator(BlobClient):
     """
@@ -46,14 +45,8 @@ class RoundAggregator(BlobClient):
             # Make sure container file is a json file and has the course of interest in the name
             if filename.lower().endswith(".json") and self.vars.golf_course_name.lower() in filename.lower():
 
-                # Extract date from filename using regex
-                match = re.search(r"(\d{4}-\d{2}-\d{2})\.json$", filename)
-                if not match:
-                    self.logger.info(f"Skipping file with unexpected format: {filename}")
-                    continue
-
                 # Read file from blob storage
-                file_date = match.group(1)
+                file_date = filename.split("_")[-2]
                 try:
                     round_data = self.read_blob_to_dict(container="golf", input_filename=filename)
 
