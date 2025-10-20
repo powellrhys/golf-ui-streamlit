@@ -1,16 +1,25 @@
 name: Collect Trackman Range Data
 on:
   workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/collect-trackman-range-data.yml"
+      - 'backend/**'
+      - 'shared/**'
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/collect-trackman-range-data.yml"
+      - 'backend/**'
+      - 'shared/**'
   schedule:
     - cron: "0 0 * * 0"
-  push:
-    paths:
-      - 'backend/**'
-      - ".github/workflows/collect-trackman-range-data.yml"
-  pull_request:
-    paths:
-      - 'backend/**'
-      - ".github/workflows/collect-trackman-range-data.yml"
+
+concurrency:
+  group: update-trackman-range-data
+  cancel-in-progress: false
 
 jobs:
   collect_trackaman_range_data:
