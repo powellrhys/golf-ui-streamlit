@@ -80,8 +80,12 @@ class TrackManAuth(AbstractDataCollection, SeleniumDriver):
             password_field = self.driver.find_element(By.ID, 'Password')
             password_field.send_keys(self.vars.trackman_password)
 
-            # Trigger JavaScript directly to simulate the button click
-            self.driver.execute_script("signinBtnClicked()")
+            # After password_field.send_keys(...), identify submit form button
+            btn_locator = (By.CSS_SELECTOR, "button.login-button")
+
+            # Wait until btn is clickable
+            WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(btn_locator))
+            self.driver.find_element(*btn_locator).click()
 
         # Handle exception if driver fails to login
         except BaseException:
