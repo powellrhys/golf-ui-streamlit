@@ -69,6 +69,9 @@ class TrackManAuth(AbstractDataCollection, SeleniumDriver):
             # Navigate the trackman report page
             self.driver.get("https://portal.trackmangolf.com/player/activities?type=reports")
 
+            # Zoom out to load all html components into view
+            self.driver.execute_script("document.body.style.zoom='50%'")
+
             # Enter Password into login form
             WebDriverWait(self.driver, 10) \
                 .until(EC.presence_of_element_located((By.ID, 'Email')))
@@ -80,12 +83,11 @@ class TrackManAuth(AbstractDataCollection, SeleniumDriver):
             password_field = self.driver.find_element(By.ID, 'Password')
             password_field.send_keys(self.vars.trackman_password)
 
-            # After password_field.send_keys(...), identify submit form button
-            btn_locator = (By.CSS_SELECTOR, "button.login-button")
+            import time
+            time.sleep(2)
 
-            # Wait until btn is clickable
-            WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(btn_locator))
-            self.driver.find_element(*btn_locator).click()
+            # Trigger JavaScript directly to simulate the button click
+            self.driver.execute_script("signinBtnClicked()")
 
         # Handle exception if driver fails to login
         except BaseException:

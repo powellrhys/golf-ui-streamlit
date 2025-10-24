@@ -69,4 +69,12 @@ jobs:
           golf_course_name: ${{ secrets.golf_course_name }}
           trackman_username: ${{ secrets.trackman_username }}
           trackman_password: ${{ secrets.trackman_password }}
-        run: poetry run python -m backend.collect_trackman_data
+        run: |
+          # Start Xvfb in the background
+          Xvfb :99 -ac &
+          
+          # Wait a moment for Xvfb to start
+          sleep 2
+
+          # Run your Python script
+          poetry run python -m backend.collect_trackman_data

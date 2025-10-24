@@ -11,4 +11,4 @@ vars = Variables()
 
 # Initiate Hole 19 Scrapper and execute scrapper
 app = TrackmanScrapper(logger=logger)
-app.run(headless=True, driver_path=vars.chromedriver_path)
+app.run(headless=False, driver_path=vars.chromedriver_path)
