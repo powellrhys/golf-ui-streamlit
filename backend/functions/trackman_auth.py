@@ -83,9 +83,6 @@ class TrackManAuth(AbstractDataCollection, SeleniumDriver):
             password_field = self.driver.find_element(By.ID, 'Password')
             password_field.send_keys(self.vars.trackman_password)
 
-            import time
-            time.sleep(2)
-
             # Trigger JavaScript directly to simulate the button click
             self.driver.execute_script("signinBtnClicked()")
 
