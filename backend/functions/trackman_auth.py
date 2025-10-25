@@ -69,9 +69,6 @@ class TrackManAuth(AbstractDataCollection, SeleniumDriver):
             # Navigate the trackman report page
             self.driver.get("https://portal.trackmangolf.com/player/activities?type=reports")
 
-            # Zoom out to load all html components into view
-            self.driver.execute_script("document.body.style.zoom='50%'")
-
             # Enter Password into login form
             WebDriverWait(self.driver, 10) \
                 .until(EC.presence_of_element_located((By.ID, 'Email')))

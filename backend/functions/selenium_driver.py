@@ -43,7 +43,6 @@ class SeleniumDriver(AbstractSeleniumDriver):
         # Configure logging to suppress unwanted messages
         chrome_options = Options()
         chrome_options.add_argument("--log-level=3")
-        chrome_options.add_argument("--window-size=1920,1080")
 
         # If headless declared, activate headless mode
         if headless:
