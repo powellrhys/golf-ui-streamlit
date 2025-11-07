@@ -21,14 +21,14 @@ jobs:
   # Lint yaml codebase
   lint-yaml:
     name: Lint Yaml Pipelines
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-yaml.yml@v1.0.0
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-yaml.yml@v1.0.3
     with:
       config_path: '.yamllint.yml'
 
   # Lint python codebase
   lint-python:
     name: Lint Python Codebase
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-python.yml@v1.0.0
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-lint-python.yml@v1.0.3
     with:
       config_path: '.flake8'
       code_directory: '.'
@@ -36,7 +36,7 @@ jobs:
   # Run PyTests
   pytesting:
     name: Run PyTests
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-pytests.yml@v1.0.0
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-pytests.yml@v1.0.3
     secrets:
       codecov_token: ${{ secrets.codecov_token }}
     with:
@@ -45,7 +45,7 @@ jobs:
   # Run BDD Tests
   bdd:
     name: Run BDD Tests
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-bdd-tests.yml@v1.0.0
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-run-bdd-tests.yml@v1.0.3
     with:
       features_path: ./tests/features/
       toml_dependencies: '.[frontend,backend,testing]'
@@ -54,7 +54,7 @@ jobs:
   build-application:
     name: Build Application
     needs: ['lint-yaml', 'lint-python', 'pytesting', 'bdd']
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-build-and-push-container.yml@v1.0.0
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-build-and-push-container.yml@v1.0.3
     secrets:
       docker_password: ${{ secrets.docker_password }}
     with:
@@ -65,7 +65,7 @@ jobs:
   plan:
     name: Plan
     needs: ['build-application']
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@v1.0.0
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@v1.0.3
     with:
       tf_directory: 'infra'
       tf_vars_file_name: 'values.tfvars'
@@ -76,8 +76,9 @@ jobs:
   # Execute apply
   apply:
     needs: ['plan']
+    if: needs.plan.outputs.has_changes == 'true'
     name: Apply
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@v1.0.0
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-plan-apply-terraform.yml@v1.0.3
     with:
       should_apply: 'true'
       release_environment: 'PROD'
@@ -90,8 +91,9 @@ jobs:
   # Restart App Service
   restart-appservice:
     needs: ['apply']
+    if: always() && (needs.apply.result == 'success' || needs.apply.result == 'skipped')
     name: Restart App Service
-    uses: powellrhys/powellrhys-iac/.github/workflows/template-restart-appservice.yml@v1.0.0
+    uses: powellrhys/powellrhys-iac/.github/workflows/template-restart-appservice.yml@v1.0.3
     with:
       webapp_name: golf-streamlit-frontend
       resource_group: powellrhys-app-service-plan-rg
