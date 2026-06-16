@@ -159,8 +159,8 @@ class TestCollectScorecardDataIntegration:
         correctly into a structured format.
         """
         # Mock get_round_date element
-        mock_time_element = MagicMock()
-        mock_time_element.get_attribute.return_value = "2025-09-04T10:30:00Z"
+        mock_date_element = MagicMock()
+        mock_date_element.text = "21/06/2025"
 
         # Mock get_course_name element
         mock_course_element = MagicMock()
@@ -175,7 +175,7 @@ class TestCollectScorecardDataIntegration:
 
         # Side effect for driver.find_element to return mocks in order
         self.parser.driver.find_element.side_effect = [
-            mock_time_element,
+            mock_date_element,
             mock_course_element,
             mock_section
         ]
@@ -190,4 +190,4 @@ class TestCollectScorecardDataIntegration:
         assert "Par" in scorecard[0]
         assert "hole" in scorecard[0]
         assert "result" in scorecard[0]
-        assert file_name.startswith("scorecards/augusta_national_2025-09-04")
+        assert file_name.startswith("scorecards/augusta_national_2025-06-21")
