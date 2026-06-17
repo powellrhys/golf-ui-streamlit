@@ -52,26 +52,21 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: list[str]: List of fairway directions per hole.
         """
-        # Define empty direction list
         directions = []
 
-        # Iterate through cell elements
         for cell in cell_elements:
-
-            # Map fairway direction object to corresponding text
             try:
-                hit = cell.find_element(By.CSS_SELECTOR, 'div.fairway-hit.scorecard-icon')
-                classes = hit.get_attribute('class').split()
-
-                if 'left' in classes:
-                    directions.append('Left')
-                elif 'target' in classes:
+                img = cell.find_element(By.CSS_SELECTOR, 'img')
+                alt = img.get_attribute('alt').lower()
+                if 'target' in alt:
                     directions.append('Target')
-                elif 'right' in classes:
+                elif 'right' in alt:
                     directions.append('Right')
+                elif 'left' in alt:
+                    directions.append('Left')
                 else:
                     directions.append('N/A')
-            except BaseException:
+            except Exception:
                 directions.append('N/A')
 
         return directions
@@ -86,13 +81,14 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: list[bool]: True if GIR, False otherwise per hole.
         """
-        # Define empty green in regulation list
         gir_results = []
 
-        # Iterate through cell elements and declare if green was hit in regulation
         for cell in cell_elements:
-            classes = cell.get_attribute('class').split()
-            gir_results.append('gir' in classes and 'true' in classes)
+            try:
+                cell.find_element(By.CSS_SELECTOR, 'img[alt="greenHit"]')
+                gir_results.append(True)
+            except Exception:
+                gir_results.append(False)
 
         return gir_results
 
@@ -106,27 +102,15 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: list[int | None]: Stroke counts per hole, or None if missing.
         """
-        # Define empty green in regulation list
         strokes = []
 
-        # Iterate through cell elements
         for cell in cell_elements:
             try:
-                # Collect strokes taken from html element
-                score_div = cell.find_element(By.CSS_SELECTOR, "div.score-value")
-                html = score_div.get_attribute("innerHTML").strip()
-                main_value = html.split("<")[0].strip()
-
-            # Handle exception and return n/a if no stroke detected
+                span = cell.find_element(By.CSS_SELECTOR, 'span > span > span')
+                value = span.text.strip()
+                strokes.append(value if value else None)
             except Exception:
-                main_value = None
-
-            # Handle empty values
-            if not main_value or main_value == "&nbsp;":
-                main_value = None
-
-            # Append stroke value to stroke list
-            strokes.append(main_value)
+                strokes.append(None)
 
         return strokes
 
@@ -138,16 +122,12 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: date | None: The round date, or None if not found.
         """
-        # Collect scorecard date
         try:
-            # Find round data element and collect its value
-            time_element = self.driver.find_element(By.CSS_SELECTOR, 'p.round-date time')
-            datetime_str = time_element.get_attribute('datetime')
+            date_element = self.driver.find_element(By.CSS_SELECTOR, 'section.round-details p')
+            date_str = date_element.text.strip()
 
-            # Strip time from datetime element
-            return datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ").date()
+            return datetime.strptime(date_str, "%d/%m/%Y").date()
 
-        # Handle exception if datetime object cannot be found
         except Exception as e:
             self.logger.error(f"Error extracting date: {e}")
             return None
@@ -160,16 +140,12 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: str | None: Normalized course name, or None if not found.
         """
-        # Find course name
         try:
-            # Find course name element and collect its value
-            course_element = self.driver.find_element(By.CSS_SELECTOR, 'p.course-name')
+            course_element = self.driver.find_element(By.CSS_SELECTOR, 'section.round-details p:nth-of-type(2)')
             course_name = course_element.text.strip()
 
-            # Return value - making sure course name is lower case and white space is handled
             return course_name.lower().replace(" ", "_")
 
-        # Handle exception if course name cannot be found
         except Exception as e:
             self.logger.error(f"Error extracting course name: {e}")
             return None
@@ -179,19 +155,22 @@ class ScorecardParser(SeleniumDriver, BlobClient):
         Clean stroke values.
 
         Replaces invalid or missing stroke entries with numeric values or "N/A".
+        Falls back to extracting the first number from the 'Scores' field if the
+        player name key is missing or unpopulated.
 
         Args: scorecard_data (list): Scorecard data with raw strokes.
 
         Returns: list: Cleaned scorecard data.
         """
-        # Iterate through scorecard table
         for hole_data in scorecard_data:
-
-            # Find strokes row
             player_row = hole_data.get(self.vars.round_site_player_name, "")
 
-            # Perform mapping
-            match = re.search(r'\d+', str(player_row))
+            # If player name key is empty/missing, fall back to the Scores field
+            if not player_row or player_row == "N/A":
+                player_row = hole_data.get("Scores", "")
+
+            # Extract the first integer (the gross score, ignoring the +/-1 suffix)
+            match = re.search(r'^\d+', str(player_row).strip())
             if match:
                 hole_data[self.vars.round_site_player_name] = match.group()
             else:
@@ -225,23 +204,19 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: int | float | bool | None | str: Converted value.
         """
-        # Leave booleans unchanged
         if isinstance(val, bool):
             return val
 
-        # Try integers first
         try:
             return int(val)
         except (ValueError, TypeError):
             pass
 
-        # Then floats
         try:
             return float(val)
         except (ValueError, TypeError):
             pass
 
-        # Handle placeholders
         if str(val).strip() in ["N/A", "-"]:
             return None
         return val
@@ -256,7 +231,6 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: list[dict]: Scorecard data with only played holes.
         """
-        # Remove unplayed holes from list
         return [d for d in data if d["Strokes"] is not None]
 
     def parse_scorecard_rows(self, line, scorecard_data) -> dict:
@@ -270,41 +244,40 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: dict: Updated scorecard data.
         """
-        # Read elements from html
-        raw_label = line.find_element(By.CSS_SELECTOR, 'div.line-left > p, div.line-left > p.body-bold')\
-            .text.strip()
+        # Get row label from the sticky first cell
+        try:
+            raw_label = line.find_element(By.CSS_SELECTOR, 'div.sticky span.truncate').text.strip()
+        except Exception:
+            return scorecard_data
+
+        # Skip header row (hole numbers) and empty labels
+        if not raw_label:
+            return scorecard_data
+
         label = raw_label.capitalize()
 
-        # Find div values
-        cell_elements = line.find_elements(By.CSS_SELECTOR, 'div.values > div.cell, div.values > *')
+        # Get hole cells only — direct children, excluding the sticky label cell
+        # and OUT/IN/TOTAL summary cells (identified by shrink-0)
+        all_cells = line.find_elements(By.XPATH, './div')
+        hole_cells = [
+            c for c in all_cells
+            if 'sticky' not in (c.get_attribute('class') or '') and 'shrink-0' not in (c.get_attribute('class') or '')
+        ]
 
-        # Perform fairways hit mapping
         if 'fairways' in label.lower():
-            scorecard_data[label] = self.parse_fairways(cell_elements)
+            scorecard_data[label] = self.parse_fairways(hole_cells)
 
-        # Perform greens in regulation mapping
-        if 'gir' in label.lower():
-            scorecard_data[label] = self.parse_gir(cell_elements)
+        elif 'gir' in label.lower():
+            scorecard_data[label] = self.parse_gir(hole_cells)
 
-        # Perform strokes taken mapping
-        if self.vars.round_site_player_name.lower() in label.lower():
-            scorecard_data[label] = self.parse_strokes(cell_elements)
+        elif self.vars.round_site_player_name.lower() in label.lower():
+            scorecard_data[label] = self.parse_strokes(hole_cells)
 
-        # Handle remaining fields
-        if label.lower() not in ["fairways", "gir", self.vars.round_site_player_name.lower()]:
-
-            # Default row (Par, Score, Putts, etc.)
-            values_elements = line.find_elements(By.CSS_SELECTOR, 'div.values > *')
+        else:
             values = []
-            for el in values_elements:
-                text = el.text.strip()
-                html = el.get_attribute('innerHTML').strip()
-                if not text and html == '&nbsp;':
-                    values.append("N/A")
-                else:
-                    values.append(text or "N/A")
-
-            # Append data to dictionary object
+            for cell in hole_cells:
+                text = cell.text.strip()
+                values.append(text if text else 'N/A')
             scorecard_data[label] = values
 
         return scorecard_data
@@ -326,10 +299,12 @@ class ScorecardParser(SeleniumDriver, BlobClient):
             hole_data = {"hole": i + 1}
 
             for key, values in scorecard_data.items():
+                # rename key "S.i." to "S. index"
+                new_key = "S. index" if key == "S.i." else key
                 if isinstance(values, list) and i < len(values):
-                    hole_data[key] = values[i]
+                    hole_data[new_key] = values[i]
                 else:
-                    hole_data[key] = "N/A"
+                    hole_data[new_key] = "N/A"
 
             holes.append(hole_data)
 
@@ -350,16 +325,13 @@ class ScorecardParser(SeleniumDriver, BlobClient):
             strokes = hole.get("Strokes")
             par = hole.get("Par")
 
-            # Handle missing values gracefully
             if strokes is None or par is None:
                 hole["result"] = None
                 results.append(hole)
                 continue
 
-            # Work out hole result
             diff = strokes - par
 
-            # Perform mapping for result
             if diff == -3:
                 hole["result"] = "Albatross"
             elif diff == -2:
@@ -373,7 +345,6 @@ class ScorecardParser(SeleniumDriver, BlobClient):
             else:
                 hole["result"] = "Double Bogey or worse"
 
-            # Append data to result dictionary
             results.append(hole)
 
         return results
@@ -412,33 +383,28 @@ class ScorecardParser(SeleniumDriver, BlobClient):
 
         Returns: tuple[list[dict], str]: Processed scorecard data and output file name.
         """
-        # Define empty scorecard dictionary object
         scorecard_data = {}
 
-        # Navigate to scorecard url and collect round date and course name
         self.driver.get(url)
         round_date = self.get_round_date()
         course_name = self.get_course_name()
         file_name = f'scorecards/{course_name}_{round_date}_{url.split("/")[-1]}.json'
 
-        # Collect scorecard data
         scorecard_section = self.driver.find_element(By.CSS_SELECTOR, 'section.round-scorecard')
-        round_lines = scorecard_section.find_elements(By.CSS_SELECTOR, 'div.round-line')
 
-        # Iterate through each row in table
+        scorecard_grid = scorecard_section.find_element(By.CSS_SELECTOR, 'section.grid')
+
+        round_lines = scorecard_grid.find_elements(By.CSS_SELECTOR, 'div.contents')
+
         for line in round_lines:
-
             scorecard_data = self.parse_scorecard_rows(line=line, scorecard_data=scorecard_data)
 
-        # Transform scorecard data
         transformed_scorecard_data = self.transform_scorecard_data(scorecard_data=scorecard_data)
 
-        # Clean stroke data
         transformed_scorecard_data = self.clean_strokes(transformed_scorecard_data)
 
         transformed_scorecard_data = self.convert_player_to_stroke_key(transformed_scorecard_data)
 
-        # Apply conversion to each entry
         for hole in transformed_scorecard_data:
             for key, value in hole.items():
                 hole[key] = self.convert_value(value)

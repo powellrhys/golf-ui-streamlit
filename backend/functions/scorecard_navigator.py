@@ -112,8 +112,9 @@ class Hole19Navigator(AbstractDataCollection, SeleniumDriver):
         # Iterate through all pages and load rounds into view
         while True:
             try:
-                # Wait until the button is clickable
-                load_more_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.lm-button.button-1")))
+                # Wait until the button is clickable. Use the current Hole19 button styling.
+                load_more_button = wait.until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "button.bg-primary-solid-2.text-white")))
 
                 # Scroll into view and click it via JS (safer for tricky buttons)
                 self.driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", load_more_button)
@@ -140,16 +141,14 @@ class Hole19Navigator(AbstractDataCollection, SeleniumDriver):
 
         Returns: list: A list of round URLs extracted from the page.
         """
-        # Find all <p> elements with class 'course-link'
-        course_link_elements = self.driver.find_elements(By.CSS_SELECTOR, "p.course-link")
+        # Find all round anchors using the current Hole19 page structure.
+        round_link_elements = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/performance/rounds/']")
 
-        # Define empty round links object
         round_links = []
-
-        # Iterate through each course link and append url to round_links list
-        for p_elem in course_link_elements:
-            a_tag = p_elem.find_element(By.TAG_NAME, "a")
+        for a_tag in round_link_elements:
             href = a_tag.get_attribute("href")
-            round_links.append(href)
+            if href:
+                round_links.append(href)
 
-        return round_links
+        # Preserve order and remove duplicates
+        return list(dict.fromkeys(round_links))

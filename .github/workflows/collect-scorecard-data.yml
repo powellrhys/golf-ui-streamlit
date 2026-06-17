@@ -35,13 +35,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.13
+          python-version: 3.11
 
       # Install Poetry
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
-          pip install poetry
+          pip install poetry==1.7.1
 
       # Configure and install Chrome
       - name: Set up Chrome
@@ -59,7 +59,7 @@ jobs:
       # Install project dependencies via Poetry
       - name: Install dependencies
         run: |
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction
 
       # Run data collection script - Scorecard
       - name: Run Data Collection Script

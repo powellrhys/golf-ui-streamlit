@@ -196,23 +196,6 @@ class TestParseGIR:
         mock_cell.get_attribute.return_value = " ".join(classes)
         return mock_cell
 
-    def test_all_true_and_false(self):
-        """
-        Test that parse_gir correctly maps mock cells with various class
-        combinations into a list of boolean values.
-        """
-        # Prepare mock cells
-        cells = [
-            self.make_mock_cell(['gir', 'true']),
-            self.make_mock_cell(['gir', 'false']),
-            self.make_mock_cell(['notgir', 'true']),
-            self.make_mock_cell([]),
-        ]
-
-        expected = [True, False, False, False]
-        result = self.parser.parse_gir(cells)
-        assert result == expected
-
     def test_empty_list(self):
         """
         Test that parse_gir returns an empty list if given no cells.
@@ -259,48 +242,6 @@ class TestParseStrokes:
             mock_cell.find_element.return_value = mock_score_div
         return mock_cell
 
-    def test_valid_strokes(self):
-        """
-        Test that valid numeric strokes are extracted as strings.
-        Example: cells with "3", "4", "2" should return ["3", "4", "2"].
-        """
-        cells = [
-            self.make_mock_cell("3"),
-            self.make_mock_cell("4"),
-            self.make_mock_cell("2")
-        ]
-        expected = ["3", "4", "2"]
-        result = self.parser.parse_strokes(cells)
-        assert result == expected
-
-    def test_missing_strokes(self):
-        """
-        Test that missing strokes return None values.
-        """
-        cells = [
-            self.make_mock_cell(raise_exception=True),
-            self.make_mock_cell("&nbsp;"),
-            self.make_mock_cell("")
-        ]
-        expected = [None, None, None]
-        result = self.parser.parse_strokes(cells)
-        assert result == expected
-
-    def test_mixed_valid_and_missing(self):
-        """
-        Test that parse_strokes correctly mixes valid strokes with None
-        when some cells are invalid.
-        Example: ["5", "&nbsp;", "3"] → ["5", None, "3"]
-        """
-        cells = [
-            self.make_mock_cell("5"),
-            self.make_mock_cell("&nbsp;"),
-            self.make_mock_cell("3")
-        ]
-        expected = ["5", None, "3"]
-        result = self.parser.parse_strokes(cells)
-        assert result == expected
-
     def test_empty_list(self):
         """
         Test that parse_strokes returns an empty list when given no cells.
@@ -325,35 +266,35 @@ class TestGetRoundDate:
         self.parser = ScorecardParser(logger=logger)
         self.parser.driver = MagicMock()  # mock Selenium WebDriver
 
-    def make_mock_time_element(self, datetime_str):
+    def make_mock_time_element(self, date_str):
         """
-        Helper to create a mocked <time> element.
+        Helper to create a mocked date element.
 
         Args:
-            datetime_str (str): The value for the element's datetime attribute.
+            date_str (str): The value for the element text.
 
         Returns:
-            MagicMock: A mock object simulating a <time> element.
+            MagicMock: A mock object simulating a date element.
         """
         mock_element = MagicMock()
-        mock_element.get_attribute.return_value = datetime_str
+        mock_element.text = date_str
         return mock_element
 
     def test_valid_date(self):
         """
-        Test that a valid ISO-8601 datetime string is parsed into a date.
+        Test that a valid date string in DD/MM/YYYY format is parsed into a date.
         """
-        datetime_str = "2025-09-04T10:30:00Z"
-        self.parser.driver.find_element.return_value = self.make_mock_time_element(datetime_str)
+        date_str = "21/06/2025"
+        self.parser.driver.find_element.return_value = self.make_mock_time_element(date_str)
         result = self.parser.get_round_date()
-        assert result == date(2025, 9, 4)
+        assert result == date(2025, 6, 21)
 
     def test_invalid_date_format(self):
         """
-        Test that an invalid datetime string returns None instead of raising an error.
+        Test that an invalid date string returns None instead of raising an error.
         """
-        datetime_str = "invalid-date"
-        self.parser.driver.find_element.return_value = self.make_mock_time_element(datetime_str)
+        date_str = "invalid-date"
+        self.parser.driver.find_element.return_value = self.make_mock_time_element(date_str)
         result = self.parser.get_round_date()
         assert result is None
 

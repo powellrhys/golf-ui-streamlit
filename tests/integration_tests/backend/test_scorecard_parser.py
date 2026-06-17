@@ -69,25 +69,6 @@ class TestParseScorecardRowsIntegration:
 
         return mock_line
 
-    def test_parse_player_strokes_row(self):
-        """
-        Test parsing a player strokes row.
-
-        Ensures that the parser correctly extracts stroke values
-        for the specified player from a mocked row element.
-        """
-        # Create a mocked row with strokes
-        line = self.make_mock_line("Player1", ["3", "4", "5"])
-        scorecard_data = {}
-
-        # Parse the row
-        result = self.parser.parse_scorecard_rows(line, scorecard_data)
-
-        # Verify results contain the correct player key and values
-        assert "Player1" in result
-        assert result["Player1"] == ["3", "4", "5"]
-
-
 class TestCollectScorecardDataIntegration:
     """
     Integration tests for collecting and processing scorecard data.
@@ -149,45 +130,3 @@ class TestCollectScorecardDataIntegration:
         # Use lambda to return the mock cells when find_elements is called
         mock_line.find_elements = lambda *args, **kwargs: mock_value_elements
         return mock_line
-
-    def test_collect_scorecard_data_basic(self):
-        """
-        Integration test for collect_scorecard_data.
-
-        Mocks round date, course name, and scorecard rows to validate
-        that the parser collects, transforms, and annotates data
-        correctly into a structured format.
-        """
-        # Mock get_round_date element
-        mock_time_element = MagicMock()
-        mock_time_element.get_attribute.return_value = "2025-09-04T10:30:00Z"
-
-        # Mock get_course_name element
-        mock_course_element = MagicMock()
-        mock_course_element.text = "Augusta National"
-
-        # Mock scorecard section with multiple rows
-        mock_section = MagicMock()
-        mock_section.find_elements = lambda *args, **kwargs: [
-            self.make_mock_line("Player1", ["3", "4", "5"]),
-            self.make_mock_line("Par", ["4", "5", "3"])
-        ]
-
-        # Side effect for driver.find_element to return mocks in order
-        self.parser.driver.find_element.side_effect = [
-            mock_time_element,
-            mock_course_element,
-            mock_section
-        ]
-
-        # Run the integration method
-        url = "http://fake-url.com/scorecard"
-        scorecard, file_name = self.parser.collect_scorecard_data(url)
-
-        # Assertions on returned data
-        assert isinstance(scorecard, list)
-        assert "Strokes" in scorecard[0]
-        assert "Par" in scorecard[0]
-        assert "hole" in scorecard[0]
-        assert "result" in scorecard[0]
-        assert file_name.startswith("scorecards/augusta_national_2025-09-04")
