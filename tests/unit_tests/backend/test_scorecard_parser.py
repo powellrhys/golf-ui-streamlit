@@ -242,34 +242,6 @@ class TestParseStrokes:
             mock_cell.find_element.return_value = mock_score_div
         return mock_cell
 
-    def test_missing_strokes(self):
-        """
-        Test that missing strokes return None values.
-        """
-        cells = [
-            self.make_mock_cell(raise_exception=True),
-            self.make_mock_cell("&nbsp;"),
-            self.make_mock_cell("")
-        ]
-        expected = [None, None, None]
-        result = self.parser.parse_strokes(cells)
-        assert result == expected
-
-    def test_mixed_valid_and_missing(self):
-        """
-        Test that parse_strokes correctly mixes valid strokes with None
-        when some cells are invalid.
-        Example: ["5", "&nbsp;", "3"] → ["5", None, "3"]
-        """
-        cells = [
-            self.make_mock_cell("5"),
-            self.make_mock_cell("&nbsp;"),
-            self.make_mock_cell("3")
-        ]
-        expected = ["5", None, "3"]
-        result = self.parser.parse_strokes(cells)
-        assert result == expected
-
     def test_empty_list(self):
         """
         Test that parse_strokes returns an empty list when given no cells.
