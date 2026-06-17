@@ -113,7 +113,8 @@ class Hole19Navigator(AbstractDataCollection, SeleniumDriver):
         while True:
             try:
                 # Wait until the button is clickable. Use the current Hole19 button styling.
-                load_more_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.bg-primary-solid-2.text-white")))
+                load_more_button = wait.until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "button.bg-primary-solid-2.text-white")))
 
                 # Scroll into view and click it via JS (safer for tricky buttons)
                 self.driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", load_more_button)

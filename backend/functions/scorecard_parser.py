@@ -261,8 +261,7 @@ class ScorecardParser(SeleniumDriver, BlobClient):
         all_cells = line.find_elements(By.XPATH, './div')
         hole_cells = [
             c for c in all_cells
-            if 'sticky' not in (c.get_attribute('class') or '')
-            and 'shrink-0' not in (c.get_attribute('class') or '')
+            if 'sticky' not in (c.get_attribute('class') or '') and 'shrink-0' not in (c.get_attribute('class') or '')
         ]
 
         if 'fairways' in label.lower():

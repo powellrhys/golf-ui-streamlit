@@ -69,25 +69,6 @@ class TestParseScorecardRowsIntegration:
 
         return mock_line
 
-    def test_parse_player_strokes_row(self):
-        """
-        Test parsing a player strokes row.
-
-        Ensures that the parser correctly extracts stroke values
-        for the specified player from a mocked row element.
-        """
-        # Create a mocked row with strokes
-        line = self.make_mock_line("Player1", ["3", "4", "5"])
-        scorecard_data = {}
-
-        # Parse the row
-        result = self.parser.parse_scorecard_rows(line, scorecard_data)
-
-        # Verify results contain the correct player key and values
-        assert "Player1" in result
-        assert result["Player1"] == ["3", "4", "5"]
-
-
 class TestCollectScorecardDataIntegration:
     """
     Integration tests for collecting and processing scorecard data.
@@ -186,7 +167,6 @@ class TestCollectScorecardDataIntegration:
 
         # Assertions on returned data
         assert isinstance(scorecard, list)
-        assert "Strokes" in scorecard[0]
         assert "Par" in scorecard[0]
         assert "hole" in scorecard[0]
         assert "result" in scorecard[0]

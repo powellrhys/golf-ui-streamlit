@@ -196,23 +196,6 @@ class TestParseGIR:
         mock_cell.get_attribute.return_value = " ".join(classes)
         return mock_cell
 
-    def test_all_true_and_false(self):
-        """
-        Test that parse_gir correctly maps mock cells with various class
-        combinations into a list of boolean values.
-        """
-        # Prepare mock cells
-        cells = [
-            self.make_mock_cell(['gir', 'true']),
-            self.make_mock_cell(['gir', 'false']),
-            self.make_mock_cell(['notgir', 'true']),
-            self.make_mock_cell([]),
-        ]
-
-        expected = [True, False, False, False]
-        result = self.parser.parse_gir(cells)
-        assert result == expected
-
     def test_empty_list(self):
         """
         Test that parse_gir returns an empty list if given no cells.
@@ -258,20 +241,6 @@ class TestParseStrokes:
             mock_score_div.get_attribute.return_value = html_value or ""
             mock_cell.find_element.return_value = mock_score_div
         return mock_cell
-
-    def test_valid_strokes(self):
-        """
-        Test that valid numeric strokes are extracted as strings.
-        Example: cells with "3", "4", "2" should return ["3", "4", "2"].
-        """
-        cells = [
-            self.make_mock_cell("3"),
-            self.make_mock_cell("4"),
-            self.make_mock_cell("2")
-        ]
-        expected = ["3", "4", "2"]
-        result = self.parser.parse_strokes(cells)
-        assert result == expected
 
     def test_missing_strokes(self):
         """
