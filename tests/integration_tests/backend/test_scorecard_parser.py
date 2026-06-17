@@ -130,4 +130,3 @@ class TestCollectScorecardDataIntegration:
         # Use lambda to return the mock cells when find_elements is called
         mock_line.find_elements = lambda *args, **kwargs: mock_value_elements
         return mock_line
-
